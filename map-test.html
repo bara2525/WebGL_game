@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bomb Game - City</title>
+    <meta name="description" content="Community Components Example">
+
+    <link rel="stylesheet" type="text/css" href="./styles/modal.css">
+    <link rel="stylesheet" type="text/css" href="./styles/healtBar.css">
+    <link rel="stylesheet" type="text/css" href="./styles/bombTimer.css">
+
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>    
+
+    
+    <!-- Pro vývoj -->
+    <!-- <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js"></script> -->
+</head>
+<body>
+    <div id="ui">
+        <button id="restart-btn" onclick="location.reload()">Restart</button>
+        <button id="toggle-camera-btn" onclick="toggleCamera()">Toggle Camera</button>
+        <button id="modal-btn">Objectives</button>
+
+        <div class="healthModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="black" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <progress id='healthBar' class="healthBarGreen" value='100' max='100'></progress>
+        </div>
+
+        <div id="timer" class="timer">
+            <svg width="24" height="24" fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+            width="800px" height="800px" viewBox="0 0 951.2 951.2" xml:space="preserve"
+           >
+       <g>
+           <path d="M819.9,331.25c0-22.1-17.9-40-40-40h-41.3c-36,0-65.301-29.2-65.301-65.2c0-108-87.899-195.8-195.8-195.8h-18.6
+               c-97.4,0-178,73.3-189.8,167.5c12.3-1,25-1.5,38-1.5c14.8,0,29.199,0.7,43,2c10.8-50.1,55.5-88,108.8-88h18.6
+               c63.9,0,115.8,51.9,115.8,115.8c0,80.1,65.2,145.2,145.301,145.2h41.3C802,371.25,819.9,353.35,819.9,331.25z"/>
+           <path d="M307.5,920.95c169.7,0,307.2-137.601,307.2-307.3c0-122.9-72.5-228.9-176.5-278.101v-61.5c0-16.7-38-30.9-91-35.8
+               c-12-1.2-26.3-1.8-40.3-1.8c-13.8,0-26.7,0.6-39.7,1.8c-53,4.8-91,19.1-91,35.9v61.5c-104,49-176.2,155.1-176.2,278
+               C0,783.35,137.7,920.95,307.5,920.95z"/>
+           <path d="M743.2,246.25c0,11,9,20,20,20h13c11,0,20-9,20-20v-65c0-11-9-20-20-20h-13c-11,0-20,9-20,20V246.25z"/>
+           <path d="M763.2,397.25c-11,0-20,9-20,20v65c0,11,9,20,20,20h13c11,0,20-9,20-20v-65c0-11-9-20-20-20H763.2z"/>
+           <path d="M931.2,302.25h-65c-11,0-20,9-20,20v13c0,11,9,20,20,20h65c11,0,20-9,20-20v-13C951.2,311.25,942.2,302.25,931.2,302.25z"
+               />
+       </g>
+       </svg>
+            <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+        </div>
+
+        <!-- pro vývoj 
+        <button id="changeValueAndColorBtn">Change health</button>
+        <button id="startTimerBtn">Start</button>
+        <button id="pauseTimerBtn">Pause</button>
+        <button id="stopTimerBtn">Stop</button>-->
+    </div> 
+
+    <!-- The Modal -->
+    <div class="modal-content" id="modal-content">
+        <div class="modal-header">
+            <span class="modal-close">&times;</span>
+            <h2>Mission Objectives</h2>
+        </div>
+        <div class="modal-body">
+            <ul>
+                <li><input type="checkbox" disabled>Find the building where the bomb is hidden</li>
+                <li><input type="checkbox" disabled>Reach the top floor of the building</li>
+                <li><input type="checkbox" disabled>Locate the bomb and neutralize enemies</li>
+                <li><input type="checkbox" disabled>Find clues to defuse the bomb</li>
+                <li><input type="checkbox" disabled>Deactivate the bomb</li>
+            </ul>
+        </div>
+        <div class="modal-footer"> </div>
+    </div>
+    
+    <a-scene physics="gravity: -9.8">
+        <a-assets>
+            <!-- Army -->
+            <a-asset-item id="elevatorModel" src="/models/Elevator.glb"></a-asset-item>
+            <a-asset-item id="enemyCharacter" position="10.24365 0 -28.60304" src="/models/humans/Adventurer.glb"></a-asset-item>
+            <a-asset-item id="man" position="5.24365 0 -24.60304" src="/models/humans/Astronaut.glb"></a-asset-item>
+        </a-assets>
+
+        <a-sky id="sky" src="../resources/DomeSky.jpg" radius="500"></a-sky>
+        <a-box id="podlaha"
+            static-body="friction: 0;; sphereRadius: NaN"
+            position="0 0 0" 
+            rotation="-90 0 0" 
+            scale="1000 1000 1"
+            static-body
+            material="src: url(../resources/outdoor-ground.jpg); normal-texture-repeat: 50 50;">
+        </a-box> 
+
+        <a-entity enemy="debug: true;" id="enemy" gltf-model="#enemyCharacter" position="-5 0 -10" rotation="0 0 0" scale="4 4 4"></a-entity>
+        <a-entity id="elevator" position="-5.24365 0 -5.60304" gltf-model="#elevatorModel" scale="4 4 4" animation-mixer="clip: 01; loop: once; clampWhenFinished : true;" static-body></a-entity>
+        <a-cylinder id="portal" portal="destination: map-floor1.html; subject: character" position="-3 4 -3" radius="5" height="5" material=" opacity: 0.3; transparent: true; side: both" ></a-cylinder>
+
+        <!-- entity -->
+        <a-entity id="character" class="character" character dynamic-body="mass: 1; angularDamping: 1; shape: box;;; sphereRadius: NaN" position="0 2 10">
+            <a-entity id="man" gltf-model="#man" animation-mixer="clip:CharacterArmature|Idle; loop:true;" position="0 0 0" rotation="5 180 0" scale="3 3 3"></a-entity>
+            <a-entity raycaster="direction: 1 0 0; far: 2;" position="0 0.5 0" rotation="0 0 0" collider-check></a-entity>
+            <a-entity id="camera" camera position="0 4 5" look-controls="pointerLockEnabled: true"></a-entity>
+        </a-entity>
+
+    </a-scene>
+</body>
+<script type="module" src="/script/map-test.js"></script>
+</html>

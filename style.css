@@ -1,0 +1,235 @@
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+
+body, #app {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;;
+}
+
+#app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game-over {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  background: rgba(255, 0, 0, 0.5);
+  color: white;
+  font-size: 3em;
+  padding: 3em;
+  border-radius: 10%;
+}
+
+#restart-btn {
+  padding: 10px 20px;
+  background-color: #f00;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+#key-collected {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  background: rgba(255, 255, 0, 0.5);
+  color: black;
+  font-size: 3em;
+  padding: 3em;
+  border-radius: 10%;
+}
+
+#gun-collected {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  background: rgba(255, 255, 0, 0.5);
+  color: black;
+  font-size: 3em;
+  padding: 3em;
+  border-radius: 10%;
+}
+#targets-destroyed {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  background: rgba(255, 255, 0, 0.5);
+  color: black;
+  font-size: 3em;
+  padding: 3em;
+  border-radius: 10%;
+}
+
+
+#interact-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  z-index: 2;
+  display: none;
+  color: white; /* Bílá barva textu */
+  font-size: 0.8em;
+}
+
+#hand-icon {
+  display: block;
+  width: 40px; /* Přizpůsobte velikost obrázku podle potřeby */
+  margin: 0 auto 1px; /* Umístění obrázku nad textem a zarovnání do středu */
+}
+
+#ui {
+  display: flex;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  width: 100%;
+}
+
+#game-over {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  background: rgba(255, 0, 0, 0.5);
+  color: white;
+  font-size: 3em;
+  padding: 3em;
+  border-radius: 10%;
+}
+
+#toggle-camera-btn {
+  padding: 10px 20px;
+  background-color: #f00;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+/* Style for the keypad modal */
+
+/* Style for the keypad modal */
+.keypad-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Adjust background color based on the image */
+  background-color: #e0e0e0; /* Light gray background */
+  border: 2px solid #007bff; /* Blue border */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); /* Soft shadow */
+}
+
+/* Style for the keypad container */
+.keypad-container {
+  text-align: center;
+  /* Adjust background color based on the image */
+  background-color: #20222c; /* Darker background color */
+  border-radius: 10px; /* Rounded corners for keypad container */
+  padding: 15px 20px; /* Add padding for spacing */
+}
+
+/* Style for keypad input */
+#keypadInput {
+  /* Make the input field wider to match most buttons */
+  width: calc(100% - 60px);
+  padding: 12px 18px;
+  margin-bottom: 10px;
+  font-size: 22px; /* Increase font size for better visibility */
+  border: none; /* Remove border from input field */
+  border-radius: 5px;
+  background-color: #303646; /* Darker background color for input */
+  color: #fff; /* White text color */
+  text-align: center; /* Center the placeholder text */
+}
+
+/* Style for keypad buttons */
+.keypad-button {
+  /* Adjust button dimensions based on the image */
+  padding: 18px 24px;
+  margin: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  /* Adjust button background color based on the image */
+  background-color: #475066; /* Darker button color */
+  color: #fff; /* White text color */
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease; /* Smooth color transition */
+}
+
+.keypad-button:hover {
+  background-color: #3a4256; /* Darker blue on hover */
+}
+
+/* Style for clear button */
+.clear-button {
+  /* Adjust clear button background color based on the image */
+  background-color: #9a0000; /* Red background color for clear button */
+}
+
+.clear-button:hover {
+  background-color: #7f0000; /* Darker red on hover */
+}
+
+/* Flexbox container for buttons */
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* Add spacing between buttons */
+}
+
+.input-container {
+  display: flex; /* Make it a flex item */
+  flex: 1; /* Allocate remaining space to this element */
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  z-index: 9999;
+}
+
+.progress-bar {
+  width: 80%;
+  height: 20px;
+  background-color: #444;
+  border-radius: 10px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  width: 0%;
+  height: 100%;
+  background-color: #00ff00;
+  transition: width 0.3s ease-in-out;
+}
+

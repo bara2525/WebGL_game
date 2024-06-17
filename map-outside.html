@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bomb Game - City</title>
+    <meta name="description" content="Community Components Example">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+    <link rel="stylesheet" type="text/css" href="./styles/healtBar.css">
+    <link rel="stylesheet" type="text/css" href="./styles/modal.css">
+    <link rel="stylesheet" type="text/css" href="./styles/bombTimer.css">
+    <link rel="stylesheet" type="text/css" href="./styles/panel.css">
+    
+    <!-- Pro vývoj 
+    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js"></script>
+--></head>
+<body>
+
+    <script type="module" src="/script/map-outside.js"></script>
+
+    <div id="ui">
+        <button id="restart-btn" onclick="location.reload()">Restart</button>
+        <button id="toggle-camera-btn" onclick="toggleCamera()">Toggle Camera</button>
+        <button id="modal-btn">Objectives</button>
+
+        <!--
+        <div id="loading-screen">
+            <div>Loading...</div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+        </div>
+        -->
+
+        <div class="healthModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="black" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <progress id='healthBar' class="healthBarGreen" value='100' max='100'></progress>
+        </div>
+
+        <div id="timer" class="timer">
+            <svg width="24" height="24" fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  width="800px" height="800px" viewBox="0 0 951.2 951.2" xml:space="preserve"
+                >
+                <g>
+                    <path d="M819.9,331.25c0-22.1-17.9-40-40-40h-41.3c-36,0-65.301-29.2-65.301-65.2c0-108-87.899-195.8-195.8-195.8h-18.6
+                        c-97.4,0-178,73.3-189.8,167.5c12.3-1,25-1.5,38-1.5c14.8,0,29.199,0.7,43,2c10.8-50.1,55.5-88,108.8-88h18.6
+                        c63.9,0,115.8,51.9,115.8,115.8c0,80.1,65.2,145.2,145.301,145.2h41.3C802,371.25,819.9,353.35,819.9,331.25z"/>
+                    <path d="M307.5,920.95c169.7,0,307.2-137.601,307.2-307.3c0-122.9-72.5-228.9-176.5-278.101v-61.5c0-16.7-38-30.9-91-35.8
+                        c-12-1.2-26.3-1.8-40.3-1.8c-13.8,0-26.7,0.6-39.7,1.8c-53,4.8-91,19.1-91,35.9v61.5c-104,49-176.2,155.1-176.2,278
+                        C0,783.35,137.7,920.95,307.5,920.95z"/>
+                    <path d="M743.2,246.25c0,11,9,20,20,20h13c11,0,20-9,20-20v-65c0-11-9-20-20-20h-13c-11,0-20,9-20,20V246.25z"/>
+                    <path d="M763.2,397.25c-11,0-20,9-20,20v65c0,11,9,20,20,20h13c11,0,20-9,20-20v-65c0-11-9-20-20-20H763.2z"/>
+                    <path d="M931.2,302.25h-65c-11,0-20,9-20,20v13c0,11,9,20,20,20h65c11,0,20-9,20-20v-13C951.2,311.25,942.2,302.25,931.2,302.25z"
+                        />
+                </g>
+            </svg>
+            <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+        </div>
+
+        <audio id="audioClick">
+            <source src="./sounds/buttons/buttonclick.wav" type="audio/mp3">
+        </audio>
+        <audio id="audioHover">
+            <source src="./sounds/buttons/buttonrollover.wav" type="audio/mp3">
+        </audio>
+
+        <div id="inventory">
+            <div class="icon-container">
+                <svg id="pistolIcon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                    viewBox="0 0 512.461 512.461" xml:space="preserve">
+                    <g transform="translate(1 1)">
+                        <g>
+                            <g>
+                                <path d="M93.328,378.964c9.387,0,17.067-7.68,17.067-17.067s-7.68-17.067-17.067-17.067c-9.387,0-17.067,7.68-17.067,17.067
+                                    S83.941,378.964,93.328,378.964z"/>
+                                <path d="M127.461,293.631c9.387,0,17.067-6.827,17.067-17.067c0-9.387-7.68-17.067-17.067-17.067s-17.067,7.68-17.067,17.067
+                                    S118.075,293.631,127.461,293.631z"/>
+                                <path d="M161.595,165.631h-102.4c-5.12,0-8.533,3.413-8.533,8.533c0,5.12,3.413,8.533,8.533,8.533h102.4
+                                    c5.12,0,8.533-3.413,8.533-8.533C170.128,169.044,166.715,165.631,161.595,165.631z"/>
+                                <path d="M161.595,131.497h-102.4c-5.12,0-8.533,3.413-8.533,8.533s3.413,8.533,8.533,8.533h102.4c5.12,0,8.533-3.413,8.533-8.533
+                                    S166.715,131.497,161.595,131.497z"/>
+                                <path d="M502.928,80.297h-17.067V63.231c0-5.12-3.413-8.533-8.533-8.533h-51.2c-5.12,0-8.533,3.413-8.533,8.533v17.067h-93.867
+                                    H204.261h-85.333V63.231c0-5.12-3.413-8.533-8.533-8.533h-51.2c-5.12,0-8.533,3.413-8.533,8.533v17.067H7.995
+                                    c-5.12,0-8.533,3.413-8.533,8.533v25.6c0,2.56,0.853,4.267,1.707,5.12l9.387,12.8c6.827,9.387,6.827,23.04,0,32.427l-9.387,12.8
+                                    c-0.853,1.707-1.707,3.413-1.707,5.12v25.6c0,5.12,3.413,8.533,8.533,8.533h32.427c8.533,0,16.213,4.267,20.48,11.093
+                                    c4.267,6.827,4.267,15.36,0.853,23.04L4.581,365.311c-10.24,22.187-5.973,48.64,9.387,67.413
+                                    c11.947,14.507,30.72,23.04,51.2,23.04h96.427c15.36,0,29.013-9.387,35.84-23.04c6.827-13.653,4.267-29.867-5.973-41.813
+                                    l-11.093-12.8c-0.853-1.707-1.707-4.267-1.707-5.973l22.214-69.973h45.2c38.4,0,69.12-30.72,69.973-69.12v-16.213h50.347
+                                    c5.12,0,8.533-3.413,8.533-8.533h102.4c5.12,0,8.533-3.413,8.533-8.533v-25.6h17.067c5.12,0,8.533-3.413,8.533-8.533v-76.8
+                                    C511.461,83.711,508.048,80.297,502.928,80.297z M434.661,71.764h34.133v8.533h-34.133V71.764z M315.195,97.364v34.133h-102.4
+                                    V97.364H315.195z M67.728,71.764h34.133v8.533H67.728V71.764z M166.715,389.204c0.853,0.853,11.947,13.653,11.947,13.653
+                                    c5.973,6.827,6.827,15.36,3.413,23.893c-4.267,7.68-11.093,12.8-20.48,12.8H65.168c-15.36,0-29.013-6.827-37.547-17.067
+                                    c-11.093-14.507-13.653-33.28-6.827-49.493l56.32-113.493c6.827-12.8,5.973-28.16-1.707-40.107
+                                    c-0.853-0.853-0.853-1.707-1.707-2.56h31.931l-70.331,163.84c-4.267,10.24-1.707,22.187,5.12,30.72
+                                    c5.973,5.973,14.507,10.24,24.747,10.24h40.96c11.093,0,21.333-6.827,23.893-17.067l62.301-187.733h17.059
+                                    c0,0-47.787,152.747-47.787,153.6C160.741,377.257,162.448,384.084,166.715,389.204z M175.248,216.831l-59.733,181.76
+                                    c-1.707,3.413-5.12,5.973-9.387,5.973h-40.96c-5.12,0-9.387-1.707-11.093-3.413c-3.413-4.267-4.267-9.387-2.56-13.653
+                                    l73.387-170.667H175.248z M298.128,233.044c0,29.013-23.04,52.053-52.053,52.053h-39.782l15.442-48.643
+                                    c7.418,13.474,18.335,20.819,39.699,28.163c0.853,0.853,1.707,0.853,2.56,0.853c3.413,0,6.827-2.56,7.68-6.827
+                                    c1.707-5.12-0.853-9.387-5.12-11.093c-24.747-8.533-29.867-15.36-34.133-29.867c-0.117-0.293-0.254-0.577-0.402-0.853h66.109
+                                    V233.044z M468.795,191.231h-93.867c0-9.387,7.68-17.067,17.067-17.067h76.8V191.231z M494.395,157.097h-17.067h-85.333
+                                    c-18.773,0-34.133,15.36-34.133,34.133v8.533h-50.347h-85.333h-0.853H40.421H16.528v-13.653l7.68-11.093
+                                    c11.947-15.36,11.947-37.547,0-52.907l-7.68-10.24V97.364h42.667h51.2h85.333v42.667c0,5.12,3.413,8.533,8.533,8.533h119.467
+                                    c5.12,0,8.533-3.413,8.533-8.533V97.364h93.867h51.2h17.067V157.097z"/>
+                            </g>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+            <div class="icon-container">
+                <svg id="keyIcon" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  viewBox="0 0 512 512"  xml:space="preserve">
+                    <g>
+                        <path class="st0" d="M433.251,165.91c6.816-3.856,13.26-8.611,19.072-14.415c34.657-34.65,34.657-90.846,0-125.503
+                            c-34.657-34.656-90.846-34.656-125.503,0c-5.804,5.812-10.551,12.257-14.415,19.08c-0.083-0.09-0.144-0.174-0.226-0.256
+                            c-34.649-34.65-90.838-34.657-125.496,0c-34.664,34.664-34.664,90.853,0,125.502c12.318,12.317,27.374,20.174,43.193,23.736
+                            L42.35,381.58c-11.555,11.555-11.555,30.279,0,41.834l12.552,12.551c11.555,11.547,30.279,11.547,41.834,0l187.526-187.526
+                            c3.57,15.819,11.419,30.884,23.736,43.201c34.657,34.65,90.838,34.657,125.503,0c34.657-34.665,34.657-90.854,0-125.503
+                            C433.418,166.054,433.327,165.994,433.251,165.91z M272.33,130.461c-12.642,12.649-33.14,12.649-45.789,0
+                            c-12.65-12.649-12.65-33.148-0.008-45.789c12.657-12.657,33.154-12.642,45.797,0C284.971,97.314,284.979,117.812,272.33,130.461z
+                            M393.644,251.783c-12.641,12.642-33.14,12.642-45.789-0.008c-12.641-12.649-12.649-33.148,0-45.782
+                            c12.649-12.656,33.148-12.649,45.789,0C406.292,218.628,406.3,239.127,393.644,251.783z M412.474,111.639
+                            c-12.656,12.657-33.162,12.657-45.804,0.015c-12.649-12.649-12.649-33.162,0.008-45.812c12.641-12.649,33.14-12.634,45.781,0.008
+                            C425.108,78.491,425.116,99.004,412.474,111.639z"/>
+                        <path class="st0" d="M196.752,356.501l-92.031,92.038l61.004,61.005c3.268,3.275,8.582,3.275,11.857,0l18.816-18.816
+                            c3.283-3.283,3.283-8.596,0.007-11.872l-24.755-24.74l30.68-30.672l24.748,24.747c3.268,3.268,8.588,3.268,11.864-0.008
+                            l18.815-18.815c3.275-3.276,3.275-8.582,0-11.857L196.752,356.501z"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="icon-container">
+                <svg id="pliersIcon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 319.697 319.697" xml:space="preserve">
+                    <g>
+                        <g>
+                            <path d="M142.273,121.814c0.031-3.446,1.352-6.876,3.978-9.508c5.202-5.202,13.547-5.284,18.888-0.312
+                                c0.041-0.015,0.082-0.031,0.118-0.046c7.214,6.508,17.244,8.146,25.887,4.941l-13.921-48.773
+                                c-4.746,0.957-9.272,3.267-12.948,6.943c-2.816,2.816-4.808,6.134-6.026,9.661c-0.02,0.005-0.041,0.015-0.056,0.02
+                                c-0.527,2.488-1.741,4.864-3.671,6.799c-4.716,4.716-12.012,5.233-17.321,1.597c-25.257,11.699-50.371,29.338-72.55,51.517
+                                C31.753,177.55,8.303,217.527,0.321,254.33c-1.05,4.844,0.538,9.646,3.799,12.907c1.838,1.838,4.209,3.19,6.938,3.784
+                                c7.573,1.643,15.043-3.164,16.686-10.737c6.871-31.677,27.556-66.591,56.75-95.78C102.43,146.569,122.305,132.034,142.273,121.814
+                                z"/>
+                            <path d="M304.757,0.004l-58.941,32.794L208.27,70.343c-0.056,0.056-5.653,6.482-16.292,8.243l7.905,27.694
+                                c13.215-2.913,19.814-6.835,23.695-10.158c-3.323,3.881-7.245,10.476-10.158,23.69l27.694,7.905
+                                c1.756-10.639,8.187-16.236,8.243-16.292l37.545-37.545l32.794-58.941L304.757,0.004z M255.011,92.86
+                                c-7.818,7.818-20.49,7.818-28.303,0c-7.818-7.818-7.818-20.49,0-28.303c7.818-7.818,20.485-7.818,28.303,0
+                                C262.829,72.37,262.829,85.042,255.011,92.86z M285.884,49.448c-4.316,4.316-11.315,4.316-15.631,0s-4.316-11.315,0-15.631
+                                s11.315-4.316,15.631,0C290.2,38.133,290.2,45.132,285.884,49.448z"/>
+                            <path d="M207.753,154.439c-0.015,0.041-0.031,0.082-0.046,0.118c4.966,5.345,4.89,13.686-0.312,18.888
+                                c-2.627,2.627-6.062,3.948-9.508,3.978c-10.225,19.968-24.76,39.844-42.685,57.774c-29.189,29.189-64.102,49.874-95.78,56.75
+                                c-7.573,1.643-12.38,9.114-10.737,16.686c0.594,2.729,1.946,5.1,3.784,6.938c3.261,3.261,8.064,4.854,12.908,3.799
+                                c36.803-7.982,76.774-31.432,109.676-64.328c22.18-22.18,39.818-47.293,51.517-72.55c-3.635-5.309-3.118-12.605,1.597-17.321
+                                c1.935-1.935,4.311-3.144,6.799-3.671c0.005-0.021,0.015-0.041,0.02-0.056c3.528-1.219,6.845-3.21,9.661-6.026
+                                c3.681-3.681,5.985-8.207,6.943-12.948l-48.773-13.921C199.607,137.194,201.246,147.225,207.753,154.439z"/>
+                            <path d="M240.879,68.94c-5.499,0-9.953,4.459-9.953,9.953s4.454,9.953,9.953,9.953c5.499,0,9.953-4.454,9.953-9.953
+                                S246.373,68.94,240.879,68.94z"/>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Modal -->
+    <div class="modal-content" id="modal-content">
+        <div class="modal-header">
+            <span class="modal-close">&times;</span>
+            <h2>Mission Objectives</h2>
+        </div>
+        <div class="modal-body">
+            <ul>
+                <li><input type="checkbox" disabled>Find the building where the bomb is hidden</li>
+                <li><input type="checkbox" disabled>Reach the top floor of the building</li>
+                <li><input type="checkbox" disabled>Locate the bomb and neutralize enemies</li>
+                <li><input type="checkbox" disabled>Find clues to defuse the bomb</li>
+                <li><input type="checkbox" disabled>Deactivate the bomb</li>
+            </ul>
+        </div>
+        <div class="modal-footer"> </div>
+    </div>
+
+    <a-scene id="my_scene" loading-screen physics="gravity: -9.8, debug: true">
+        <a-assets>
+            <!-- human -->
+            <a-asset-item id="man" position="5.24365 0 -24.60304" src="/models/humans/Astronaut.glb"></a-asset-item>
+            <a-asset-item id="militaryManModel" src="/models/humans/Military man.glb"></a-asset-item>
+            <a-asset-item id="ManModel" src="/models/humans/Man.glb"></a-asset-item>
+            <a-asset-item id="MilitaryManModel" src="/models/humans/Military man.glb"></a-asset-item>
+            <a-asset-item id="Soldier1Model" src="/models/humans/Soldier.glb"></a-asset-item>
+            <a-asset-item id="Soldier2Model" src="/models/humans/Soldier(1).glb"></a-asset-item>
+            <a-asset-item id="Soldier3Model" src="/models/humans/Soldier(2).glb"></a-asset-item>
+            <a-asset-item id="Soldier4Model" src="/models/humans/Soldier(3).glb"></a-asset-item>
+            <a-asset-item id="SwatModel" src="/models/humans/SWAT.glb"></a-asset-item>
+
+            <!-- Army -->
+            <a-asset-item id="tankModel" src="/models/cars/Tank.glb"></a-asset-item>
+            
+            <!-- Roads -->
+            <a-asset-item id="roadModel01" src="/models/roads/road-straight.glb"></a-asset-item>
+            <a-asset-item id="roadModel02" src="/models/roads/road-straight-crossing.glb"></a-asset-item>
+            <a-asset-item id="roadModel03" src="/models/roads/road-turn.glb"></a-asset-item>
+            <a-asset-item id="roadModel04" src="/models/roads/road-tsplit.glb"></a-asset-item>
+            <a-asset-item id="roadModel05" src="/models/roads/road-junction.glb"></a-asset-item>
+            <a-asset-item id="parkSlot" src="/models/roads/Parking Lot.glb"></a-asset-item>
+
+            <a-asset-item id="lightModel" src="/models/roads/Streetlight.glb"></a-asset-item>
+            <a-asset-item id="tligratModel" src="/models/roads/Trafficlight B.glb"></a-asset-item>
+
+            <!-- Vehicle -->
+            <a-asset-item id="humveeModelModel" src="/models/cars/Humvee.glb"></a-asset-item>
+            <a-asset-item id="policeCarModel" src="/models/cars/Police Car.glb"></a-asset-item>
+            <a-asset-item id="alianShipModel" src="/models/Army/Flying saucer.glb"></a-asset-item>
+            <a-asset-item id="policeCar2Model" src="/models/cars/Police Car 2.glb"></a-asset-item>
+
+            <!-- Fence -->
+            <a-asset-item id="fenceModel01" src="/models/fence/Barrier Large.glb"></a-asset-item>
+            <a-asset-item id="fenceModel03" src="/models/fence/Fence(1).glb"></a-asset-item>
+            <a-asset-item id="fenceModel04" src="/models/fence/Fence.glb"></a-asset-item>
+
+            <!-- Green -->
+            <a-asset-item id="trees" src="/models/trees/Trees.glb"></a-asset-item>
+            <a-asset-item id="signHospitalModel" src="/models/bulding/Sign Hospital.glb"></a-asset-item>
+            <a-asset-item id="wallModel" src="/models/walls.glb"></a-asset-item>
+            <a-asset-item id="mountainModel" src="/models/trees/Mountain(1).glb"></a-asset-item>
+            <a-asset-item id="forestModel" src="/models/trees/Forest.glb"></a-asset-item>
+
+            <!-- Buldings -->
+            <a-asset-item id="buldingModel00" src="/models/bulding/Building.glb"></a-asset-item>
+            <a-asset-item id="FerrisWheelModel" src="/models/bulding/Ferris Wheel.glb"></a-asset-item>
+            <a-asset-item id="buldingModel01" src="/models/bulding/Skyscraper-BwEXdOoUSO.glb"></a-asset-item>
+            <a-asset-item id="buldingBarModel" src="/models/bulding/Bar.glb"></a-asset-item>
+            <a-asset-item id="billboardModel" src="/models/bulding/Billboard.glb"></a-asset-item>
+            <a-asset-item id="churchModel" src="/models/bulding/Church.glb"></a-asset-item>
+
+            <a-asset-item id="ballParkModel" src="/models/bulding/Ballpark.glb"></a-asset-item>
+            <a-asset-item id="prisonModel" src="/models/bulding/Prison.glb"></a-asset-item>
+            <a-asset-item id="structure1Model" src="/models/bulding/Structure(1).glb"></a-asset-item>
+            <a-asset-item id="structure2Model" src="/models/bulding/Structure.glb"></a-asset-item>
+            <a-asset-item id="computerLModel" src="/models/bulding/Computer Large.glb"></a-asset-item>
+
+            <a-asset-item id="buldingModel21" src="/models/bulding2/Building B.glb"></a-asset-item>
+            <a-asset-item id="buldingModel22" src="/models/bulding2/Building-7lMEpT2ICD.glb"></a-asset-item>
+            <a-asset-item id="buldingModel23" src="/models/bulding2/Building-bbH2Bg73qM.glb"></a-asset-item>
+            <a-asset-item id="buldingModel24" src="/models/bulding2/Building-g15lpKh4li.glb"></a-asset-item>
+            <a-asset-item id="buldingModel25" src="/models/bulding2/Building-otRsYa6pan.glb"></a-asset-item>
+            <a-asset-item id="buldingModel26" src="/models/bulding2/Building-T3oyvK6VEU.glb"></a-asset-item>
+
+
+            <!-- small bulding -->
+            <a-asset-item id="smallBuldingModel01" src="/models/bulding/Small Building-gyjF60t7CG.glb"></a-asset-item>
+            <a-asset-item id="smallBuldingModel02" src="/models/bulding/Small Building-QjL4Fo9dU9.glb"></a-asset-item>
+            <a-asset-item id="smallBuldingModel03" src="/models/bulding/Small Building-Rq572hdKEz.glb"></a-asset-item>
+            <a-asset-item id="smallBuldingModel04" src="/models/bulding/Small Building-t9j9Lof5ul.glb"></a-asset-item>
+            <a-asset-item id="smallBuldingModel05" src="/models/bulding/Small Building-yLvnMqC9ZG.glb"></a-asset-item>
+            <a-asset-item id="smallBuldingModel06" src="/models/bulding/Small Building.glb"></a-asset-item>
+
+            <!-- Large bulding -->
+            <a-asset-item id="largeBuldingModel01" src="/models/bulding/Large Building-1bt4yYKmuK.glb"></a-asset-item>
+            <a-asset-item id="largeBuldingModel02" src="/models/bulding/Large Building-3IhrYZp6tP.glb"></a-asset-item>
+            <a-asset-item id="largeBuldingModel03" src="/models/bulding/Large Building-h7Jaq7bqMq.glb"></a-asset-item>
+            <a-asset-item id="largeBuldingModel04" src="/models/bulding/Large Building-JgGLJH2iXj.glb"></a-asset-item>
+            <a-asset-item id="largeBuldingModel05" src="/models/bulding/Large Building-ppwtREejXg.glb"></a-asset-item>
+            <a-asset-item id="largeBuldingModel06" src="/models/bulding/Large Building-sxXonOmtct.glb"></a-asset-item>
+            <a-asset-item id="largeBuldingModel07" src="/models/bulding/Large Building.glb"></a-asset-item>
+            
+            <a-asset-item id="enemyCharacter" position="10.24365 0 -28.60304" src="/models/humans/Adventurer.glb"></a-asset-item>
+            <a-asset-item id="Pistol" src="/models/Pistol.glb"></a-asset-item>
+
+            <!-- zvuk -->
+             <audio id="police_siren_sound" src="./sounds/police-siren.mp3"></audio>
+             <audio id="police_siren_sound2" src="./sounds/GTA SA police siren.mp3"></audio>
+             <audio id="tanksound" src="./sounds/tank-track-ratteling.mp3"></audio>
+        </a-assets>
+
+        <a-light id="mainLight" light="color: #3e3737" scale="20 20 20" position="0 501.89588 0" type="ambient" color="#ffffff" intensity="0.5"></a-light>
+        <a-sky id="sky" material="color: #25252d; flatShading: false; fog: true" src="../resources/DomeSky.jpg" radius="500" color="#3e3737"></a-sky>
+        <a-box id="podlaha"
+            static-body="friction: 0;; sphereRadius: NaN"
+            position="0 0 0" 
+            rotation="-90 0 0" 
+            scale="1000 1000 1"
+            static-body
+            material="src: url(../resources/outdoor-ground.jpg); normal-texture-repeat: 50 50;">
+        </a-box>
+
+        <!-- roads -->
+        <a-entity class="street-01">
+            <a-entity id="road-s01" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-183.93159 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s02" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-144.21051 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s03" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-104.68148 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s04" static-body="sphereRadius: NaN" gltf-model="#roadModel04" position="-64.97412 0.5 -19.06683" scale="20 2 20" rotation="0 -90 0" material="color: green"></a-entity>
+            <a-entity id="road-s05" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-25.08398 0.5 -19.067" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s06" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="14.66914 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s07" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="54.46843 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s08" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="94.48126 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s09" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="134.4192 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+  
+            <a-entity id="road-s11" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="254.55322 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s12" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-224.0442 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s13" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="333.57011 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s14" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="293.76612 0.5 -19.067" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s15" static-body="sphereRadius: NaN" gltf-model="#roadModel03" position="373.12098 0.5 -19.00164" scale="20 2 20" rotation="0 -90 0" material="color: green"></a-entity>
+            <a-entity id="road-s16" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="214.52313 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s17" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="174.44994 0.5 -19.06683" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+        </a-entity>
+
+        <a-entity class="street-02">
+            <a-entity id="road-s18" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.97412 0.5 20" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s19" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.97412 0.5 60" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s20" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.97412 0.5 100" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s21" static-body="sphereRadius: NaN" gltf-model="#roadModel05" position="-64.97412 0.5 140" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s22" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.974 0.5 180" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s23" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.97412 0.5 220" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s24" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.97412 0.5 260" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s25" static-body="sphereRadius: NaN" gltf-model="#roadModel05" position="-64.974 0.5 300" scale="20 2 20" rotation="0 0 0" material="color: green">
+                
+            </a-entity>
+            <a-entity id="road-s26" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.974 0.5 340" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s29" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.92933 0.5 375.59344" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+        </a-entity>
+
+        <a-entity class="street-03">
+            <a-entity id="road-s27" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="175 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s28" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="135 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s30" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="95 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s31" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="55 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s32" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="15 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s33" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-25 0.5 139.998" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s34" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="215 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s35" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="255 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s36" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="295 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s37" static-body="sphereRadius: NaN" gltf-model="#roadModel04" position="335 0.5 140.02193" scale="20 2 20" rotation="0 -90 0" material="color: green"></a-entity>
+            <a-entity id="road-s38" static-body="sphereRadius: NaN" gltf-model="#roadModel03" position="375 0.5 140.01719" scale="20 2 20" rotation="0 180 0" material="color: green"></a-entity>
+            <a-entity id="road-s39" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-105 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s40" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-145 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s41" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-185 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s42" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-225 0.5 140.02193" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+        </a-entity>
+
+        <a-entity class="street-04">
+            <a-entity id="road-s43" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 20" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s44" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 60" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s45" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 100" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s46" static-body="sphereRadius: NaN" gltf-model="#roadModel04" position="-263.207 0.5 140" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s47" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 180" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s48" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 220" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s49" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 260" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s50" static-body="sphereRadius: NaN" gltf-model="#roadModel03" position="-263.207 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s51" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 -57.54918" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s52" static-body="sphereRadius: NaN" gltf-model="#roadModel04" position="-263.207 0.5 -18.908" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+        </a-entity>
+
+        <a-entity class="street-05">
+            <a-entity id="road-s53" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="175 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s54" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="135 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s55" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="95 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s56" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="55 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s57" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="15 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s58" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-25 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s59" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="215 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s60" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="255 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s61" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="295 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s62" static-body="sphereRadius: NaN" gltf-model="#roadModel03" position="335 0.5 300" scale="20 2 20" rotation="0 180 0" material="color: green"></a-entity>
+            <a-entity id="road-s63" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="335 0.5 260" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-a63" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="335 0.5 220" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-b63" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="335 0.5 180" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s64" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-105 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s65" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-145 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s66" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-185 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s67" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-225 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+        </a-entity>
+
+        <a-entity class="street-06">
+            <a-entity id="road-s68" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="175 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s69" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="135 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s70" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="95 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s71" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="55 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s72" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="15 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s73" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-25 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s74" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="215 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s75" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="255 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s76" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="295 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s77" static-body="sphereRadius: NaN" gltf-model="#roadModel03" position="335 0.5 300" scale="20 2 20" rotation="0 180 0" material="color: green"></a-entity>
+            <a-entity id="road-s78" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="335 0.5 260" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s79" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="335 0.5 220" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s80" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="335 0.5 180" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s81" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-105 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s82" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-145 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s83" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-185 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s84" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-225 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+        </a-entity>
+
+        <a-entity class="street-07">
+            <a-entity id="road-s85" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="374.78848 0.5 101.30845" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s86" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="374.81941 0.5 61.63672" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s87" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="375.07706 0.5 23.00595" scale="20 2 25" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s88" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 -96.94912" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s89" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-263.207 0.5 -136.91648" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s90" static-body="sphereRadius: NaN" gltf-model="#roadModel03" position="-263.207 0.5 -176.56809" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s91" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-223.1728 0.5 -176.568" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s92" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-183.68608 0.5 -176.568" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s93" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-25.9779 0.5 -176.568" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s94" static-body="sphereRadius: NaN" gltf-model="#roadModel03" position="53.77171 0.5 -176.57978" scale="20 2 20" rotation="0 180 0" material="color: green"></a-entity>
+            <a-entity id="road-s95" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="14.01896 0.5 -176.568" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s96" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-65.6952 0.5 -176.568" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s97" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-64.929 1 415.36543" scale="20 2 20" rotation="0 0 0" material="color: green"></a-entity>
+            <a-entity id="road-s98" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-105 0.5 -176.568" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-s99" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-144.11494 0.5 -176.568" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-a01" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-185 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="road-a02" static-body="sphereRadius: NaN" gltf-model="#roadModel01" position="-225 0.5 300" scale="20 2 20" rotation="0 90 0" material="color: green"></a-entity>
+        </a-entity>
+
+        <!-- trees -->
+        <a-entity class="trees">
+            <a-entity id="forest01" static-body="sphereRadius: NaN" gltf-model="#forestModel" position="160.50529 0 -155.8664" scale="30 50 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="forest02" static-body="sphereRadius: NaN" gltf-model="#forestModel" position="120.25538 0 -211.3658" scale="30 50 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="forest03" static-body="sphereRadius: NaN" gltf-model="#forestModel" position="207.84191 0 -110.82537" scale="30 50 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="forest04" static-body="sphereRadius: NaN" gltf-model="#forestModel" position="441.44983 0 -103.71342" scale="30 50 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="forest05" static-body="sphereRadius: NaN" gltf-model="#forestModel" position="-288.80065 6.49795 -338.84426" scale="30 50 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="forest06" static-body="sphereRadius: NaN" gltf-model="#forestModel" position="421.59519 0 -56.53739" scale="30 50 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="forest07" static-body="sphereRadius: NaN" gltf-model="#forestModel" position="-321.38843 0 -199.42887" scale="30 50 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+
+            <a-entity id="trees01" static-body="sphereRadius: NaN" gltf-model="#trees" position="-313.57931 0 280.75064" scale="30 30 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="trees02" static-body="sphereRadius: NaN" gltf-model="#trees" position="-365.19641 0 291.82547" scale="30 30 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="trees03" gltf-model="#trees" position="-317.16315 -1.532 330.49487" scale="30 30 30" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <!-- street light -->
+        <a-entity class="street-light">
+
+            <a-entity id="streetLight-01" static-body="sphereRadius: NaN" gltf-model="#lightModel" position="-45.193 0 265.228" scale="30 30 30" rotation="0 0 0" material="color: green" static-body>
+                <a-light id="streetLight-W1" type="point" color="white" intensity="2" distance="10" decay="2" position="-0.2581 0.82108 0" light="shadowCameraVisible: false; intensity: 4.29; color: #ffdd00; distance: 22" rotation="-88.301 0 90"></a-light>
+            </a-entity>
+
+            <a-entity id="streetLight-02" static-body="sphereRadius: NaN" gltf-model="#lightModel" position="-48.59 0 180.612" scale="30 30 30" rotation="0 0 0" material="color: green" static-body>
+                <a-light id="streetLight-W2" type="point" color="white" intensity="2" distance="10" decay="2" position="-0.23385 0.57145 0" light="shadowCameraVisible: false; intensity: 4.29; color: #ffdd00; distance: 22" rotation="-88.30081763879168 0 90.00021045914971"></a-light>
+            </a-entity>
+
+            <a-entity id="streetLight-03" static-body="sphereRadius: NaN" gltf-model="#lightModel" position="3.27267 0 117.08798" scale="30 30 30" rotation="0 90 0" material="color: green" static-body>
+                <a-light id="streetLight-W3" type="point" color="white" intensity="2" distance="10" decay="2" position="-0.16256 0.75814 0" light="shadowCameraVisible: false; intensity: 4.29; color: #ffdd00; distance: 22" rotation="-88.30081763879168 0 90.00021045914971"></a-light>
+            </a-entity>
+
+            <a-entity id="streetLight-04" static-body="sphereRadius: NaN" gltf-model="#lightModel" position="154.31403 0 115.38285" scale="30 30 30" rotation="0 90 0" material="color: green" static-body>
+                <a-light id="streetLight-W4" type="point" color="white" intensity="2" distance="10" decay="2" position="-0.19153 0.67744 0" light="shadowCameraVisible: false; intensity: 4.29; color: #ffdd00; distance: 22" rotation="-88.30081763879168 0 90.00021045914971"></a-light>
+            </a-entity>
+
+            <a-entity id="streetLight-05" static-body="sphereRadius: NaN" gltf-model="#lightModel" position="86.005 0 -41.326" scale="30 30 30" rotation="0 90 0" material="color: green" static-body>
+                <a-light id="streetLight-W5" type="point" color="white" intensity="2" distance="10" decay="2" position="-0.29513 0.79183 0" light="shadowCameraVisible: false; intensity: 4.29; color: #ffdd00; distance: 22" rotation="-88.30081763879168 0 90.00021045914971"></a-light>
+            </a-entity>
+
+            <a-entity id="streetTLight-01" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-246.082 0 123.537" scale="15 15 15" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-02" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-245.29405 0 158.40692" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-03" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-279.90882 0 124.15405" scale="15 15 15" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-04" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-279.24943 0 -43.40447" scale="15 15 15" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-05" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-243.99993 0 -39.22389" scale="15 15 15" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-06" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-247.56945 -2.01904 -3.90416" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-07" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-50.4347 0 281.50078" scale="15 15 15" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-08" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-85.42318 -1.65153 281.83227" scale="15 15 15" rotation="0 -90 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-09" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-49.90929 0 315.89622" scale="15 15 15" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-10" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-83.30054 0 314.63196" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-11" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-81.61546 -0.43322 122.53108" scale="15 15 15" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-12" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-50.14355 0 122.95397" scale="15 15 15" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-13" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-46.54441 0 157.03919" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-14" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-82.98542 0 153.84463" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-15" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-85.45827 0.36792 -3.18774" scale="15 15 15" rotation="0 -90 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-16" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-48.71744 1 -2.38672" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-17" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="-47.58906 0 -35.2285" scale="15 15 15" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-18" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="347.50257 1 123.90146" scale="15 15 15" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-19" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="348.67186 0 156.63296" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="streetTLight-20" static-body="sphereRadius: NaN" gltf-model="#tligratModel" position="314.15047 0 154.73163" scale="15 15 15" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+
+        <!-- vehicle -->
+        <a-entity class="vehicle">
+            <a-entity class="policecar2">
+
+                <a-entity id="policeCar2-03" static-body="sphereRadius: NaN" gltf-model="#policeCar2Model" position="382.82793 1 14.34458" scale="20 20 20" rotation="0 -45 0" static-body>
+                    <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="11-sirens" position="0 0.27125 0">
+                        <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                        <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                    </a-entity>
+                </a-entity>
+
+                <a-entity id="policeCar2-05" static-body="sphereRadius: NaN" gltf-model="#policeCar2Model" position="362.56324 2 12.08834" scale="20 20 20" rotation="0 0 0" static-body>
+                    <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="09-sirens" position="0 0.33754 0">
+                        <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                        <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                    </a-entity>
+                </a-entity>
+
+                <a-entity id="policeCar2-06" static-body="sphereRadius: NaN" gltf-model="#policeCar2Model" position="-74.05 2 334.377" scale="20 20 20" rotation="0 0 0" static-body>
+                        <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="07-sirens" position="0 0.39004 0">
+                                <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                                <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                        </a-entity>
+                </a-entity>
+
+                <a-entity id="policeCar2-09" static-body="sphereRadius: NaN" gltf-model="#policeCar2Model" position="-100.07071 1 -10.66912" scale="20 20 20" rotation="0 200 0" static-body>
+                    <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="06-sirens" position="0 0.41204 0">
+                        <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                        <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                    </a-entity>
+                </a-entity>
+
+                <a-entity id="policeCar2-10" static-body="sphereRadius: NaN" gltf-model="#policeCar2Model" position="-18.418 2 -27.676" scale="20 20 20" rotation="0 -45 0" static-body>
+                    <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="05-sirens" position="0.01187 0.33235 0.03479">
+                        <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                        <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                    </a-entity>
+                </a-entity>
+
+            </a-entity>
+            
+            <a-entity class="policecar">
+                <a-entity id="policeCar-02" static-body="sphereRadius: NaN" gltf-model="#policeCarModel" position="373.67786 1 29.13487" scale="5 5 5" rotation="0 45 0" static-body>
+                    <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="03-sirens" position="0.01154 1.12709 -0.42898">
+                        <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                        <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                    </a-entity>
+                </a-entity>
+
+                <a-entity id="policeCar-03" static-body="sphereRadius: NaN" gltf-model="#policeCarModel" position="-98.42605 1 -28.11469" scale="5 5 5" rotation="0 -45 0" static-body>
+                    <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="02-sirens" position="0.0766 1.58777 -0.27701">
+                        <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                        <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                    </a-entity>
+                </a-entity>
+
+                <a-entity id="policeCar-04" static-body="sphereRadius: NaN" gltf-model="#policeCarModel" position="-29.957 1 -12.186" scale="5 5 5" rotation="0 45 0" static-body>
+                    <a-entity policesiren sound="src:#police_siren_sound; autoplay: true" id="01-sirens" position="-0.13241 1.43664 -0.4023">
+                        <a-light id="sirens-Blue" class="sirens-Blue" type="point" color="blue" intensity="2" distance="10" decay="2" position="0.13027 0.16194 -0.08297" light="shadowCameraVisible: false; intensity: 4.5" rotation="0 90 0"></a-light>
+                        <a-light id="sirens-Red" class="sirens-Red" type="point" color="red" intensity="2" distance="10" decay="2" position="-0.003 0.1716 -0.09995" light="shadowCameraVisible: false; intensity: 6.87" rotation="0 90 0"></a-light>
+                    </a-entity>
+                </a-entity>
+            </a-entity>
+            
+            <a-entity class="humbceeCar">
+                <a-entity id="humvee-02" static-body="sphereRadius: NaN" gltf-model="#humveeModelModel" position="397.91274 0 46.59502" scale="4 4 4" rotation="0 90 0" static-body></a-entity>
+                <a-entity id="humvee-03" static-body="sphereRadius: NaN" gltf-model="#humveeModelModel" position="400.2472 0 68.64491" scale="4 4 4" rotation="0 100 0" static-body></a-entity>
+                <a-entity id="humvee-04" static-body="sphereRadius: NaN" gltf-model="#humveeModelModel" position="-34.11669 1 -31.6829" scale="4 4 4" rotation="0 0 0" static-body></a-entity>
+                <a-entity id="humvee-06" static-body="sphereRadius: NaN" gltf-model="#humveeModelModel" position="387.1018 1 -27.94654" scale="4 4 4" rotation="0 -45 0" static-body></a-entity>
+                <a-entity id="humvee-07" static-body="sphereRadius: NaN" gltf-model="#humveeModelModel" position="396.16214 1 26.88694" scale="4 4 4" rotation="0 90 0" static-body></a-entity>
+            </a-entity>
+            <a-entity id="tank" animation-mixer="clip:TankArmature|Tank_Forward" static-body="sphereRadius: NaN" gltf-model="#tankModel" position="375.22767 2 -11.38095" scale="2 3 2" rotation="0 160 0" static-body sound="src:#tanksound; volume: 3; autoplay: true; loop: true; maxDistance: 1; poolSize: 1.19; loopEnd: 0; refDistance: 0.1"></a-entity>
+            <a-entity id="alianShip-1" gltf-model="#alianShipModel" position="461.98205 1 51.95568" scale="40 40 40" rotation="-45 45 0" static-body></a-entity>           
+        </a-entity>
+
+        <!-- humans -->
+        <a-entity class="humans">
+            <a-entity id="Soldier0-01" static-body="sphereRadius: NaN" gltf-model="#militaryManModel" position="383.76872 1 33.00223" scale="4 4 4" rotation="0 0 0" material="color: green" static-body></a-entity> 
+
+            <a-entity id="soldir1-01" static-body="sphereRadius: NaN" gltf-model="#Soldier1Model" position="-95.11735 5 -19.77423" scale="1 1 1" rotation="0 90 0" material="color: green" static-body></a-entity> 
+
+            <a-entity id="soldir2-01" static-body="sphereRadius: NaN" gltf-model="#Soldier2Model" position="389.433 1 19.14272" scale="0.2 0.2 0.2" rotation="0 90 0" material="color: green" static-body></a-entity> 
+            <a-entity id="soldir2-02" static-body="sphereRadius: NaN" gltf-model="#Soldier2Model" position="389.43279 1 52.22139" scale="0.2 0.2 0.2" rotation="0 110 0" material="color: green" static-body></a-entity> 
+            <a-entity id="soldir2-03" static-body="sphereRadius: NaN" gltf-model="#Soldier2Model" position="389.43279 1 37.5526" scale="0.2 0.2 0.2" rotation="0 90 0" material="color: green" static-body></a-entity> 
+            <a-entity id="soldir2-04" static-body="sphereRadius: NaN" gltf-model="#Soldier2Model" position="392.50766 1 60.95368" scale="0.2 0.2 0.2" rotation="0 120 0" material="color: green" static-body></a-entity> 
+            <a-entity id="soldir2-05" static-body="sphereRadius: NaN" gltf-model="#Soldier2Model" position="389.433 1 41.436" scale="0.2 0.2 0.2" rotation="0 100 0" material="color: green" static-body></a-entity> 
+            <a-entity id="soldir2-06" static-body="sphereRadius: NaN" gltf-model="#Soldier2Model" position="389.43279 1 33.12549" scale="0.2 0.2 0.2" rotation="0 100 0" material="color: green" static-body></a-entity> 
+
+            <a-entity id="soldir3-01" animation-mixer="clip: CharacterArmature|Interact; clampWhenFinished: false; loop: repeat; repetitions: Infinity" static-body="sphereRadius: NaN" gltf-model="#Soldier3Model" position="375.24251 1 22.60387" scale="4 4 4" rotation="0 90 0" material="color: green" static-body></a-entity> 
+
+            <a-entity id="soldir4-01" static-body="sphereRadius: NaN" gltf-model="#Soldier4Model" position="-163.09801 1.28802 -20.75985" scale="4 4 4" rotation="0 90 0" material="color: green" static-body></a-entity> 
+
+        </a-entity>
+
+        <!-- Small Bulding -->
+        <a-entity class="smallBuldings">
+            <a-entity id="smallBulding01" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel01" position="119.26383 0 -64.22075" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding02" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel02" position="179.008 0 -63.14562" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding03" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel03" position="212.28361 0 -61.42806" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding04" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel04" position="247.06204 0 -59.1407" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding05" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel05" position="279.58309 0 -59.47186" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding06" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel06" position="246.29627 0 24.85857" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+
+            <a-entity id="smallBulding07" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel01" position="-25.40071 0 208.41768" scale="40 40 50" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding08" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel02" position="39.85172 0 183.51806" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding09" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel03" position="72.44409 0 181.9253" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding10" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel04" position="-22.33598 0 182.21579" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding11" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel05" position="8.20624 0 180.98462" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="smallBulding12" static-body="sphereRadius: NaN" gltf-model="#smallBuldingModel06" position="109.92387 0 175.76779" scale="40 40 50" rotation="0 -90 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <!-- Large Bulding -->
+        <a-entity class="largeBuldings1">
+            <a-entity id="largeBulding01" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel01" position="-20.263 0 30.035" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding02" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel02" position="29.1164 0 29.42377" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding03" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel03" position="-212.31648 0 -87.426" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding04" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel04" position="-225.901 0 20.52373" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding05" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel05" position="93.9825 0 30.11378" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding06" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel06" position="336.49457 0 -59.502" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding07" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="307.24316 0 20.60875" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <a-entity class="largeBuldings2">
+            <a-entity id="largeBulding08" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel01" position="-70.67685 0 -69.03362" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding09" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel02" position="-124 0 -68.823" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding10" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel05" position="-166.61006 0 30.1222" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding11" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel06" position="175.54665 0 19.98962" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding12" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="275.27626 0 20.63099" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <a-entity class="largeBuldings3">
+            <a-entity id="largeBulding13" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel01" position="29.825 0 88.526" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding14" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel02" position="-21.31835 0 90.30635" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding15" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel05" position="-124.44721 0 90.24299" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding16" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel06" position="95.09605 0 98.8406" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding17" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="171.306 0 100.137" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding18" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel01" position="212.87839 0 90.50957" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding19" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel02" position="260.93633 0 90.30635" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding20" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel05" position="-204.833 0 90.286" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding21" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel06" position="314.81446 0 101.48452" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding22" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="171.30571 0 99.65685" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <a-entity class="largeBuldings4">
+            <a-entity id="largeBulding23" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel01" position="38.51378 0 351.02278" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding24" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel02" position="85.53613 0 353.33855" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding25" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel05" position="379.20096 0 203.87487" scale="40 40 50" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding26" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel06" position="416.24143 0 122.7644" scale="40 40 50" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding27" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="158.92167 0 179.88286" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding28" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel01" position="207.228 0 249.86235" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding29" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel02" position="200.38056 0 190.2757" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding30" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel05" position="380.11617 0 283.66776" scale="40 40 50" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding31" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel06" position="150.77644 0 341.34157" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding32" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="-1.164 -2.241 341.76363" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding33" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="-131.39568 -2.241 -136.26071" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding34" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel05" position="-74.80409 0 -127.33901" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding35" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel06" position="335.83078 0 40.2177" scale="40 40 50" rotation="0 -90 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding36" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="17.31291 0 -136.81735" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="largeBulding37" static-body="sphereRadius: NaN" gltf-model="#largeBuldingModel07" position="-17.59339 -2.241 -136.87575" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <!-- Special Bulding -->
+        <a-entity class="specialBulding">
+            <a-entity id="FerrisWheel" static-body="sphereRadius: NaN" gltf-model="#FerrisWheelModel" position="-422.46627 69.24542 16.28472" scale="84.84492 85.29719 92.68796" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="ballPark" static-body="sphereRadius: NaN" gltf-model="#ballParkModel" position="-166.02735 1.5 223.4341" scale="0.15 0.15 0.15" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="prison" static-body="sphereRadius: NaN" gltf-model="#prisonModel" position="-141.46857 1.5 377.3523" scale="0.05 0.05 0.055" rotation="0 90 0" material="color: green" static-body></a-entity>
+            <a-entity id="structure01" static-body="sphereRadius: NaN" gltf-model="#structure1Model" position="-208.4227 1.80594 338.33201" scale="5 5 5" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="structure02" static-body="sphereRadius: NaN" gltf-model="#structure2Model" position="-254.34579 1.5 338.48414" scale="5 5 5" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="computerLarge" static-body="sphereRadius: NaN" gltf-model="#computerLModel" position="-234.14862 0.95881 371.48034" scale="50 50 50" rotation="0 170 0" material="color: green" static-body></a-entity>
+            <a-entity id="bulding00" static-body="sphereRadius: NaN" gltf-model="#buldingModel00" position="-2.565 0 -69.57761" scale="40 40 50" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="bulding01" static-body="sphereRadius: NaN" gltf-model="#buldingModel01" position="64.329 0 -69.86647" scale="40 40 50" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="buldingBar" static-body="sphereRadius: NaN" gltf-model="#buldingBarModel" position="-111.57364 3 20.66963" scale="0.2 0.1 0.15" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="billboard" static-body="sphereRadius: NaN" gltf-model="#billboardModel" position="-414.01746 0 -92.1293" scale="0.09 0.09 0.09" rotation="0 155.70013491121097 0" material="color: green" static-body></a-entity>
+            <a-entity id="church" static-body="sphereRadius: NaN" gltf-model="#churchModel" position="275.67771 0 227.87773" scale="4.5 4.5 4.5" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <a-entity class="comonBulding">
+            <a-entity id="comonBulding01" static-body="sphereRadius: NaN" gltf-model="#buldingModel21" position="-26.45146 -1 338.39848" scale="20 20 20" rotation="0 -90 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding02" static-body="sphereRadius: NaN" gltf-model="#buldingModel22" position="217.9449 -1 339.57961" scale="20 20 20" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding03" static-body="sphereRadius: NaN" gltf-model="#buldingModel23" position="335.9465 -1 339.17332" scale="20 20 20" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding04" static-body="sphereRadius: NaN" gltf-model="#buldingModel24" position="257.4106 1 338.50581" scale="20 20 20" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding05" static-body="sphereRadius: NaN" gltf-model="#buldingModel25" position="296.71656 -1.17111 338.27417" scale="20 20 20" rotation="0 180 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding06" static-body="sphereRadius: NaN" gltf-model="#buldingModel26" position="-26.22027 -1.08818 377.8603" scale="20 20 20" rotation="0 -90 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding07" static-body="sphereRadius: NaN" gltf-model="#buldingModel21" position="11.93998 -1 260.67558" scale="20 20 20" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding08" static-body="sphereRadius: NaN" gltf-model="#buldingModel22" position="166.18599 -1 260.50598" scale="20 20 20" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding09" static-body="sphereRadius: NaN" gltf-model="#buldingModel23" position="51.50144 -1 261.19326" scale="20 20 20" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding10" static-body="sphereRadius: NaN" gltf-model="#buldingModel24" position="89.40217 -1 259.98063" scale="20 20 20" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding11" static-body="sphereRadius: NaN" gltf-model="#buldingModel25" position="127.25094 -1.17111 260.81205" scale="20 20 20" rotation="0 0 0" material="color: green" static-body></a-entity>
+            <a-entity id="comonBulding12" static-body="sphereRadius: NaN" gltf-model="#buldingModel26" position="-27.46175 -1 260.0165" scale="20 20 20" rotation="0 0 0" material="color: green" static-body></a-entity>
+        </a-entity>
+
+        <!-- entity -->
+        <a-entity id="character" character dynamic-body="mass: 1; angularDamping: 1; shape: box;" position="-68 5 386">
+            <a-entity id="man" gltf-model="#man" rotate-with-camera  animation-mixer="clip:CharacterArmature|Idle; loop:true;" rotation="0 180 0" scale="3 3 3">
+                <a-entity id="Pistol" gltf-model="#Pistol" gun visible="false" scale="0.2 0.2 0.2" rotation="0 0 0"></a-entity>
+            </a-entity>
+            <a-entity raycaster="direction: 0 0 -1; far: 1;" position="0 1.5 0"></a-entity>
+            <a-entity id="first-camera" camera position="0 5 -1" active="true" look-controls="pointerLockEnabled: true" circle-around="radius: -1">
+                <a-cursor intersection-spawn="event: click; mixin: voxel"></a-cursor>
+            </a-entity>
+            <a-entity id="third-camera" camera position="0 6 4" active="false" look-controls="pointerLockEnabled: true" orbit-controls="target: #character; minDistance: 2; maxDistance: 10; initialPosition: 0 5 10; rotateSpeed: 0.5">
+                <a-cursor intersection-spawn="event: click; mixin: voxel"></a-cursor>
+            </a-entity>
+        </a-entity>
+
+        <!-- bulding entery -->
+        <a-box id="entrance-marker" static-body="sphereRadius: NaN" entrance-marker="target: #character" position="0 0 -3" width="1" height="0.1" depth="1" color="yellow" static-body></a-box>
+        <a-box id="signHospital" rotation="0 90.6728629106333 0" scale="10 50 50" static-body="sphereRadius: NaN" gltf-model="#signHospitalModel" position="64.84409 14.86234 -39.84669" width="1" height="0.1" depth="1" color="yellow" static-body></a-box>
+
+
+        <!-- city wall -->
+        <a-entity class="cityWall">
+            <a-box id="wall01" rotation="0 0 0" scale="10 3 3" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-361.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall02" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-341.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall03" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-321.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall04" rotation="0 0 0" scale="10 2 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-301.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall05" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-281.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall06" rotation="0 0 0" scale="10 4 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-261.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall07" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-241.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall08" rotation="0 0 0" scale="10 2 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-221.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall09" rotation="0 0 0" scale="10 4 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-201.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall10" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-181.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall11" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-161.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall12" rotation="0 0 0" scale="10 4 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-141.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall13" rotation="0 0 0" scale="10 2 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-121.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall14" rotation="0 0 0" scale="10 4 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-101.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall15" rotation="0 0 0" scale="10 3 3" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-81.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall16" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-61.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall17" rotation="0 0 0" scale="10 2 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-41.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall18" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-21.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall19" rotation="0 0 0" scale="10 4 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="-01.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall20" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+19.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall21" rotation="0 0 0" scale="10 2 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+39.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall22" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+59.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall23" rotation="0 0 0" scale="10 4 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+79.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall24" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+99.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall25" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+119.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall26" rotation="0 0 0" scale="10 2 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+139.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall27" rotation="0 0 0" scale="10 3 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+159.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="wall28" rotation="0 0 0" scale="10 4 2" static-body="sphereRadius: NaN" gltf-model="#wallModel" position="+179.45213 0 -225.65623" width="10" height="0.1" depth="1" color="yellow" static-body></a-box>
+        
+            <a-box id="cityFance01" rotation="0 180 0" scale="4 4 4" static-body="sphereRadius: NaN" gltf-model="#fenceModel01" position="-80.54611 1 396.45968" width="1" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="cityFance02" rotation="0 180 0" scale="4 4 4" static-body="sphereRadius: NaN" gltf-model="#fenceModel01" position="-64.91007 1 396.41704" width="1" height="0.1" depth="1" color="yellow" static-body></a-box>
+            <a-box id="cityFance03" rotation="0 180 0" scale="4 4 4" static-body="sphereRadius: NaN" gltf-model="#fenceModel01" position="-48.94649 1 396.15934" width="1" height="0.1" depth="1" color="yellow" static-body></a-box>
+        </a-entity>
+
+        <!-- parking slot -->
+        <a-entity class="Parking">
+            <a-entity id="parkinSlot1" static-body="sphereRadius: NaN" gltf-model="#parkSlot" position="-339.098 1 191.00987" scale="30 30 30" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinSlot2" static-body="sphereRadius: NaN" gltf-model="#parkSlot" position="-339.09839 1 -16.17642" scale="30 30 30" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinSlot3" static-body="sphereRadius: NaN" gltf-model="#parkSlot" position="-338.86644 1 87.64664" scale="30 30 30" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinSlot4" static-body="sphereRadius: NaN" gltf-model="#parkSlot" position="-338.866 1 -120.02838" scale="30 30 30" rotation="0 90 0" material="color: green"></a-entity>
+            
+            <a-entity id="parkinFence01" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-282.93999 1.5 93.58057" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence02" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-282.86854 1.5 103.15332" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence03" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-282.70516 1.5 112.90444" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            
+            <a-entity id="parkinFence04" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 9.12153" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence05" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 -0.3885" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence06" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 -10.7404" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            
+            <a-entity id="parkinFence07" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 214.94896" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence08" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 205.48012" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence09" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 196.05846" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+
+            <a-entity id="parkinFence10" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 -95.08687" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence11" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 -104.78785" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence12" static-body="sphereRadius: NaN" gltf-model="#fenceModel03" position="-283.27777 1.5 -114.73917" scale="5 5 5" rotation="0 90 0" material="color: green"></a-entity>
+
+
+            <a-entity id="parkinFence-01" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.316 1 69.2147" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-02" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.316 1 33.032" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-03" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 -206.48287" scale="3 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-04" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 -34.67113" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-05" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 349.22716" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-06" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 312.23911" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-07" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 275.22634" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-08" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 136.26103" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-09" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 172.7969" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-10" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 238.66889" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-11" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 -175.7129" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-12" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 -138.29909" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+            <a-entity id="parkinFence-13" static-body="sphereRadius: NaN" gltf-model="#fenceModel04" position="-283.31575 1 -71.33366" scale="5 1.5 3" rotation="0 90 0" material="color: green"></a-entity>
+        
+        </a-entity>
+
+        <a-entity class="mountains">
+            <a-box id="mountain-1" rotation="0 90 0" scale="1 1 1" static-body="sphereRadius: NaN" gltf-model="#mountainModel" position="368.61928 10 -362.87076" width="1" height="1" depth="1" color="yellow" static-body></a-box>
+        </a-entity>
+
+        <a-cylinder id="portal" portal="destination: map-house.html; subject: character" position="0 2 -34" radius="5" height="5" material=" opacity: 0.3; transparent: true; side: both" ></a-cylinder>
+        <a-entity enemy id="enemy" class="enemy" gltf-model="#enemyCharacter" position="-6 0 -15" rotation="0 0 0" scale="4 4 4" static-body></a-entity>
+        <a-entity enemy id="enemy" class="enemy" gltf-model="#enemyCharacter" position="-65 0 -10" rotation="0 0 0" scale="4 4 4" static-body></a-entity>
+        <a-entity enemy id="enemy" class="enemy" gltf-model="#enemyCharacter" position="-80 0 159" rotation="0 0 0" scale="4 4 4" static-body></a-entity>
+        <a-entity enemy id="enemy" class="enemy" gltf-model="#enemyCharacter" position="142 0 112" rotation="0 0 0" scale="4 4 4" static-body></a-entity>
+        <a-entity enemy id="enemy" class="enemy" gltf-model="#enemyCharacter" position="236 0 51" rotation="0 0 0" scale="4 4 4" static-body></a-entity>
+
+        <a-entity collectible id="guns" gltf-model="#Pistol" position="-68 5 346" rotation="0 0 0" static-body></a-entity>
+    </a-scene>
+</body>
+</html>

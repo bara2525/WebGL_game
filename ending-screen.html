@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="./styles/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap" rel="stylesheet">
+    <title>Bomb Game - Ending Screen</title>
+    <style>
+        /* Additional or modified styles for ending screen */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .menu {
+            max-width: 600px;
+            margin: auto;
+            text-align: left;
+        }
+        .functionalButtons {
+            display: block;
+            font-size: 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            background-color: #333;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .functionalButtons:hover {
+            background-color: #555;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<div class="screen">
+    <div id="winOutcome" class="menu" style="display: none;">
+        <h1>Congratulations!</h1>
+        <h2>You Successfully Defused the Bomb!</h2>
+        <p>
+            The city is safe thanks to your bravery and skill.
+        </p>
+        <p>
+            Thank you for playing "Hidden Threat: Urban Pursuit of Terrorists".
+        </p>
+        <a href="./map-outside.html" class="functionalButtons">Play Again</a>
+        <a href="#" id="controls" class="functionalButtons">Controls</a>
+        <a href="#" id="about" class="functionalButtons">About</a>
+    </div>
+    <div id="loseOutcome" class="menu" style="display: none;">
+        <h1>Game Over</h1>
+        <h2>You Lost!</h2>
+        <p>
+            Unfortunately, the bomb detonated and the city is now in chaos. The mission has failed.
+        </p>
+        <p>
+            Thank you for playing "Hidden Threat: Urban Pursuit of Terrorists".
+        </p>
+        <a href="./map-outside.html" class="functionalButtons">Play Again</a>
+        <a href="#" id="controls" class="functionalButtons">Controls</a>
+        <a href="#" id="about" class="functionalButtons">About</a>
+    </div>
+</div>
+<video autoplay loop muted id="videobackground">
+    <source src="./resources//others/3645176-hd_1280_720_24fps.mp4" type="video/mp4">
+</video>
+<audio autoplay loop id="audioBackground">
+    <source src="./sounds/dark-ambient-clock-56349.mp3" type="audio/mp3">
+</audio>
+<audio id="audioClick">
+    <source src="./sounds/buttons/buttonclick.wav" type="audio/mp3">
+</audio>
+<audio id="audioHover">
+    <source src="./sounds/buttons/buttonrollover.wav" type="audio/mp3">
+</audio>
+<script>
+    // JavaScript to determine which outcome to show based on query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const outcome = urlParams.get('outcome');
+
+    if (outcome === 'win') {
+        document.getElementById('winOutcome').style.display = 'block';
+    } else if (outcome === 'lose') {
+        document.getElementById('loseOutcome').style.display = 'block';
+    } else {
+        // Handle unknown outcomes or default behavior
+        console.error('Unknown outcome:', outcome);
+    }
+</script>
+</body>
+</html>

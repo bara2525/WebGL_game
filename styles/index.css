@@ -1,0 +1,223 @@
+body 
+{
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    padding: 0;
+    //background-image: url('../resources/others/main-menu-bg.jpg');
+    //background-size: cover;
+    height: 100vh;
+}
+
+.screen
+{
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: start;
+}
+
+video 
+{
+    position: absolute;
+    min-width:100%;
+    min-height: 100vh;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: -1;
+}
+
+audio 
+{
+    display: none;
+}
+
+.menu 
+{
+    color:#fff;
+    margin-left: 4em;
+    text-transform: uppercase;
+    max-width: 100%;
+    padding: 10px;
+}
+
+.menu > h1
+{
+    font-size: 4em;
+    letter-spacing: 30px;
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+.menu > h3
+{
+    font-weight: 300;
+    font-size: 1.5em;
+    text-align: center;
+    letter-spacing: 10px;
+    position: relative;
+    display: block;
+}
+
+.menu h3::before,
+.menu h3::after
+{
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    width: 4em;
+    height: 3px;
+}
+
+.menu h3::before {left: 0;}
+.menu h3::after {right: 0;}
+
+.menu ul
+{
+    list-style: none;
+    padding: 0;
+}
+
+.menu li
+{
+    margin: 2em 0;
+}
+
+.menu li:hover > *
+{
+    border-bottom: 1px solid #fff;
+}
+
+.menu li > *
+{
+    padding: 0px 40px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 700;
+    width: 50%;
+    cursor: pointer;
+    display: inline-block;
+}
+
+#sound, #nosound
+{
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    color: #fff;
+    cursor: pointer;
+    display:block;
+}
+
+#nosound {display: none}
+
+.menu li *:hover, #sound:hover
+{
+    color: #bdbdbd
+}
+
+@media screen and (max-width: 800px)
+{
+    .menu h1 {font-size: 2em;}
+    .menu h3 {font-size: 1em;}
+}
+
+@media screen and (max-width: 500px)
+{
+    .menu h1 {letter-spacing: 5px;}
+    .menu h3::before,
+    .menu h3::after {display: none}
+}
+
+@media screen and (max-width: 450px)
+{
+    .screen, video
+    {
+        height: 35em;
+    }
+}
+
+
+#controls-body, 
+#about-body
+{
+    display: none;
+    height: 60vh;
+    max-width: 80%;
+}
+
+table {
+    width: 50%;
+    margin: auto;
+    border-collapse: collapse;
+    margin-top: 50px;
+    overflow-y: auto;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  th {
+    background-color: #000;
+  }
+  tr:nth-child(even) {
+    background-color: #444;
+  }
+
+  caption 
+  {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+
+#backButton
+{
+    border: 0px;
+    width: 100px;
+    display: inline-block;
+    background-color: #222;
+    color: #fff;
+    text-align: center;
+    padding: 10px 20px;
+}
+
+#backButton:hover
+{
+    background-color: #aaa;
+    cursor: pointer;
+}
+
+.blockText
+{
+    box-sizing: border-box;
+    margin: 0px;
+    width: 100%;
+    padding: 40px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    background-color: rgba(249, 249, 249, 0.1);
+    margin-top: 50px;
+  }
+
+  #about-body h2 
+  {
+    font-size: 28px;
+    margin-bottom: 20px;
+    display: block;
+    width: 250px;
+  }
+
+  #about-body p 
+  {
+    font-size: 18px;
+    line-height: 1.6;
+    text-align: justify;
+    display: inline-block;
+    word-break: break-word;
+  }

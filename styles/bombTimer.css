@@ -1,0 +1,11 @@
+.timer 
+{
+    font-family: 'Digital-7', sans-serif;
+    font-size: 2em;
+    padding: 10px;
+    border: 2px solid #333;
+    border-radius: 5px;
+    display: inline-block;
+    margin-left: 50px;
+    background: #333;
+}

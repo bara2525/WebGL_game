@@ -1,0 +1,90 @@
+ /* Modal Header */
+ .modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+  }
+
+  #modal-btn 
+  {/*
+    position: absolute;
+      top: 10px;
+      right: 10px;*/
+      padding: 10px 20px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      borde: solid #000 2px;
+  }
+  
+  /* Modal Body */
+  .modal-body {padding: 2px 16px;}
+  
+  /* Modal Footer */
+  .modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+  }
+
+  /* The Close Button */
+  .modal-close
+   {
+    color: #000;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 15px;
+  }
+
+  .modal-close:hover, 
+  .modal-close:focus
+  {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+  }
+  
+  /* Modal Content */
+  .modal-content 
+  {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 50%; /* Adjust as needed */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 1000;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+  
+  /* Add Animation */
+  @keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+  } 
+
+  /* Styling the checkbox list */
+.modal-body ul {
+  list-style: none; /* Remove default bullet points */
+  padding: 0;
+}
+
+.modal-body ul li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modal-body ul li input[type="checkbox"] {
+  margin-right: 10px;
+}

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bomb Game - f1</title>
+    <meta name="description" content="Community Components Example">
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
+
+    <!-- Pro vývoj 
+    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js"></script>
+    -->
+<!--    <script src="main.js"></script>-->
+    <!-- Importovat externí styl -->
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" type="text/css" href="./styles/healtBar.css">
+    <link rel="stylesheet" type="text/css" href="./styles/modal.css">
+    <link rel="stylesheet" type="text/css" href="./styles/bombTimer.css">
+    <link rel="stylesheet" type="text/css" href="./styles/panel.css">
+
+    <script>
+        AFRAME.registerComponent('switch-interaction', {
+            init: function () {
+                const lampBalls = document.querySelectorAll('[id^="Lamp light ball"]');
+                let isVisible = true;
+                let CanSwitch = false;
+                var el = this.el;
+
+                el.addEventListener('raycaster-intersected', function () {
+                    console.log('Cursor is hovering over switch.');
+                    CanSwitch = true;
+
+                    if (isNearby("#Switch-1", 7))
+                    {
+                        const messageElement = document.getElementById('interact-text');
+                        messageElement.style.display = 'block';
+                    }
+
+                    // Sem můžete přidat další akce, které chcete provést, když je kurzor nad tímto objektem.
+                });
+                el.addEventListener('raycaster-intersected-cleared', function () {
+                    console.log('Cursor is no longer hovering over switch.');
+                    CanSwitch = false;
+
+                    const messageElement = document.getElementById('interact-text');
+                    messageElement.style.display = 'none';
+
+                    // Sem můžete přidat další akce, které chcete provést, když kurzor opustí tento objekt.
+                });
+
+                this.el.sceneEl.addEventListener('loaded', () => {
+                    window.addEventListener('keydown', (event) => {
+                        if ( CanSwitch && (event.key === 'e' || event.key === 'E') && isNearby("#Switch-1", 7)) {
+                            isVisible = !isVisible;
+                            lampBalls.forEach(lamp => {
+                                lamp.setAttribute('visible', isVisible);
+                            });
+                        }
+                    });
+                });
+
+                function isNearby(switchElId, maxDistance) {
+                    const characterPos = document.querySelector('#character').getAttribute('position');
+                    const switchPos = document.querySelector(switchElId).getAttribute('position');
+                    const distance = Math.sqrt(
+                        Math.pow(characterPos.x - switchPos.x, 2) +
+                        Math.pow(characterPos.y - switchPos.y, 2) +
+                        Math.pow(characterPos.z - switchPos.z, 2)
+                    );
+                    console.log('Distance to switch:', distance.toFixed(2));
+                    return distance < maxDistance;
+                }
+            }
+        });
+
+    </script>
+</head>
+<body>
+
+<div id="game-over">You lost!</div>
+<div id="ui">
+    <button id="restart-btn" onclick="location.reload()">Restart</button>
+    <button id="toggle-camera-btn" onclick="toggleCamera()">Toggle Camera</button>
+    <button id="modal-btn">Objectives</button>
+
+    <div id="loading-screen">
+        <div>Loading...</div>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="healthModal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="black" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <progress id='healthBar' class="healthBarGreen" value='100' max='100'></progress>
+    </div>
+
+    <div id="timer" class="timer">
+        <svg width="24" height="24" fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  width="800px" height="800px" viewBox="0 0 951.2 951.2" xml:space="preserve"
+        >
+                <g>
+                    <path d="M819.9,331.25c0-22.1-17.9-40-40-40h-41.3c-36,0-65.301-29.2-65.301-65.2c0-108-87.899-195.8-195.8-195.8h-18.6
+                        c-97.4,0-178,73.3-189.8,167.5c12.3-1,25-1.5,38-1.5c14.8,0,29.199,0.7,43,2c10.8-50.1,55.5-88,108.8-88h18.6
+                        c63.9,0,115.8,51.9,115.8,115.8c0,80.1,65.2,145.2,145.301,145.2h41.3C802,371.25,819.9,353.35,819.9,331.25z"/>
+                    <path d="M307.5,920.95c169.7,0,307.2-137.601,307.2-307.3c0-122.9-72.5-228.9-176.5-278.101v-61.5c0-16.7-38-30.9-91-35.8
+                        c-12-1.2-26.3-1.8-40.3-1.8c-13.8,0-26.7,0.6-39.7,1.8c-53,4.8-91,19.1-91,35.9v61.5c-104,49-176.2,155.1-176.2,278
+                        C0,783.35,137.7,920.95,307.5,920.95z"/>
+                    <path d="M743.2,246.25c0,11,9,20,20,20h13c11,0,20-9,20-20v-65c0-11-9-20-20-20h-13c-11,0-20,9-20,20V246.25z"/>
+                    <path d="M763.2,397.25c-11,0-20,9-20,20v65c0,11,9,20,20,20h13c11,0,20-9,20-20v-65c0-11-9-20-20-20H763.2z"/>
+                    <path d="M931.2,302.25h-65c-11,0-20,9-20,20v13c0,11,9,20,20,20h65c11,0,20-9,20-20v-13C951.2,311.25,942.2,302.25,931.2,302.25z"
+                    />
+                </g>
+            </svg>
+        <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+    </div>
+
+    <div id="inventory">
+        <div class="icon-container">
+            <svg id="pistolIcon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                viewBox="0 0 512.461 512.461" xml:space="preserve">
+                <g transform="translate(1 1)">
+                    <g>
+                        <g>
+                            <path d="M93.328,378.964c9.387,0,17.067-7.68,17.067-17.067s-7.68-17.067-17.067-17.067c-9.387,0-17.067,7.68-17.067,17.067
+                                S83.941,378.964,93.328,378.964z"/>
+                            <path d="M127.461,293.631c9.387,0,17.067-6.827,17.067-17.067c0-9.387-7.68-17.067-17.067-17.067s-17.067,7.68-17.067,17.067
+                                S118.075,293.631,127.461,293.631z"/>
+                            <path d="M161.595,165.631h-102.4c-5.12,0-8.533,3.413-8.533,8.533c0,5.12,3.413,8.533,8.533,8.533h102.4
+                                c5.12,0,8.533-3.413,8.533-8.533C170.128,169.044,166.715,165.631,161.595,165.631z"/>
+                            <path d="M161.595,131.497h-102.4c-5.12,0-8.533,3.413-8.533,8.533s3.413,8.533,8.533,8.533h102.4c5.12,0,8.533-3.413,8.533-8.533
+                                S166.715,131.497,161.595,131.497z"/>
+                            <path d="M502.928,80.297h-17.067V63.231c0-5.12-3.413-8.533-8.533-8.533h-51.2c-5.12,0-8.533,3.413-8.533,8.533v17.067h-93.867
+                                H204.261h-85.333V63.231c0-5.12-3.413-8.533-8.533-8.533h-51.2c-5.12,0-8.533,3.413-8.533,8.533v17.067H7.995
+                                c-5.12,0-8.533,3.413-8.533,8.533v25.6c0,2.56,0.853,4.267,1.707,5.12l9.387,12.8c6.827,9.387,6.827,23.04,0,32.427l-9.387,12.8
+                                c-0.853,1.707-1.707,3.413-1.707,5.12v25.6c0,5.12,3.413,8.533,8.533,8.533h32.427c8.533,0,16.213,4.267,20.48,11.093
+                                c4.267,6.827,4.267,15.36,0.853,23.04L4.581,365.311c-10.24,22.187-5.973,48.64,9.387,67.413
+                                c11.947,14.507,30.72,23.04,51.2,23.04h96.427c15.36,0,29.013-9.387,35.84-23.04c6.827-13.653,4.267-29.867-5.973-41.813
+                                l-11.093-12.8c-0.853-1.707-1.707-4.267-1.707-5.973l22.214-69.973h45.2c38.4,0,69.12-30.72,69.973-69.12v-16.213h50.347
+                                c5.12,0,8.533-3.413,8.533-8.533h102.4c5.12,0,8.533-3.413,8.533-8.533v-25.6h17.067c5.12,0,8.533-3.413,8.533-8.533v-76.8
+                                C511.461,83.711,508.048,80.297,502.928,80.297z M434.661,71.764h34.133v8.533h-34.133V71.764z M315.195,97.364v34.133h-102.4
+                                V97.364H315.195z M67.728,71.764h34.133v8.533H67.728V71.764z M166.715,389.204c0.853,0.853,11.947,13.653,11.947,13.653
+                                c5.973,6.827,6.827,15.36,3.413,23.893c-4.267,7.68-11.093,12.8-20.48,12.8H65.168c-15.36,0-29.013-6.827-37.547-17.067
+                                c-11.093-14.507-13.653-33.28-6.827-49.493l56.32-113.493c6.827-12.8,5.973-28.16-1.707-40.107
+                                c-0.853-0.853-0.853-1.707-1.707-2.56h31.931l-70.331,163.84c-4.267,10.24-1.707,22.187,5.12,30.72
+                                c5.973,5.973,14.507,10.24,24.747,10.24h40.96c11.093,0,21.333-6.827,23.893-17.067l62.301-187.733h17.059
+                                c0,0-47.787,152.747-47.787,153.6C160.741,377.257,162.448,384.084,166.715,389.204z M175.248,216.831l-59.733,181.76
+                                c-1.707,3.413-5.12,5.973-9.387,5.973h-40.96c-5.12,0-9.387-1.707-11.093-3.413c-3.413-4.267-4.267-9.387-2.56-13.653
+                                l73.387-170.667H175.248z M298.128,233.044c0,29.013-23.04,52.053-52.053,52.053h-39.782l15.442-48.643
+                                c7.418,13.474,18.335,20.819,39.699,28.163c0.853,0.853,1.707,0.853,2.56,0.853c3.413,0,6.827-2.56,7.68-6.827
+                                c1.707-5.12-0.853-9.387-5.12-11.093c-24.747-8.533-29.867-15.36-34.133-29.867c-0.117-0.293-0.254-0.577-0.402-0.853h66.109
+                                V233.044z M468.795,191.231h-93.867c0-9.387,7.68-17.067,17.067-17.067h76.8V191.231z M494.395,157.097h-17.067h-85.333
+                                c-18.773,0-34.133,15.36-34.133,34.133v8.533h-50.347h-85.333h-0.853H40.421H16.528v-13.653l7.68-11.093
+                                c11.947-15.36,11.947-37.547,0-52.907l-7.68-10.24V97.364h42.667h51.2h85.333v42.667c0,5.12,3.413,8.533,8.533,8.533h119.467
+                                c5.12,0,8.533-3.413,8.533-8.533V97.364h93.867h51.2h17.067V157.097z"/>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <div class="icon-container">
+            <svg id="keyIcon" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  viewBox="0 0 512 512"  xml:space="preserve">
+                <g>
+                    <path class="st0" d="M433.251,165.91c6.816-3.856,13.26-8.611,19.072-14.415c34.657-34.65,34.657-90.846,0-125.503
+                        c-34.657-34.656-90.846-34.656-125.503,0c-5.804,5.812-10.551,12.257-14.415,19.08c-0.083-0.09-0.144-0.174-0.226-0.256
+                        c-34.649-34.65-90.838-34.657-125.496,0c-34.664,34.664-34.664,90.853,0,125.502c12.318,12.317,27.374,20.174,43.193,23.736
+                        L42.35,381.58c-11.555,11.555-11.555,30.279,0,41.834l12.552,12.551c11.555,11.547,30.279,11.547,41.834,0l187.526-187.526
+                        c3.57,15.819,11.419,30.884,23.736,43.201c34.657,34.65,90.838,34.657,125.503,0c34.657-34.665,34.657-90.854,0-125.503
+                        C433.418,166.054,433.327,165.994,433.251,165.91z M272.33,130.461c-12.642,12.649-33.14,12.649-45.789,0
+                        c-12.65-12.649-12.65-33.148-0.008-45.789c12.657-12.657,33.154-12.642,45.797,0C284.971,97.314,284.979,117.812,272.33,130.461z
+                        M393.644,251.783c-12.641,12.642-33.14,12.642-45.789-0.008c-12.641-12.649-12.649-33.148,0-45.782
+                        c12.649-12.656,33.148-12.649,45.789,0C406.292,218.628,406.3,239.127,393.644,251.783z M412.474,111.639
+                        c-12.656,12.657-33.162,12.657-45.804,0.015c-12.649-12.649-12.649-33.162,0.008-45.812c12.641-12.649,33.14-12.634,45.781,0.008
+                        C425.108,78.491,425.116,99.004,412.474,111.639z"/>
+                    <path class="st0" d="M196.752,356.501l-92.031,92.038l61.004,61.005c3.268,3.275,8.582,3.275,11.857,0l18.816-18.816
+                        c3.283-3.283,3.283-8.596,0.007-11.872l-24.755-24.74l30.68-30.672l24.748,24.747c3.268,3.268,8.588,3.268,11.864-0.008
+                        l18.815-18.815c3.275-3.276,3.275-8.582,0-11.857L196.752,356.501z"/>
+                </g>
+            </svg>
+        </div>
+        <div class="icon-container">
+            <svg id="pliersIcon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 319.697 319.697" xml:space="preserve">
+                <g>
+                    <g>
+                        <path d="M142.273,121.814c0.031-3.446,1.352-6.876,3.978-9.508c5.202-5.202,13.547-5.284,18.888-0.312
+                            c0.041-0.015,0.082-0.031,0.118-0.046c7.214,6.508,17.244,8.146,25.887,4.941l-13.921-48.773
+                            c-4.746,0.957-9.272,3.267-12.948,6.943c-2.816,2.816-4.808,6.134-6.026,9.661c-0.02,0.005-0.041,0.015-0.056,0.02
+                            c-0.527,2.488-1.741,4.864-3.671,6.799c-4.716,4.716-12.012,5.233-17.321,1.597c-25.257,11.699-50.371,29.338-72.55,51.517
+                            C31.753,177.55,8.303,217.527,0.321,254.33c-1.05,4.844,0.538,9.646,3.799,12.907c1.838,1.838,4.209,3.19,6.938,3.784
+                            c7.573,1.643,15.043-3.164,16.686-10.737c6.871-31.677,27.556-66.591,56.75-95.78C102.43,146.569,122.305,132.034,142.273,121.814
+                            z"/>
+                        <path d="M304.757,0.004l-58.941,32.794L208.27,70.343c-0.056,0.056-5.653,6.482-16.292,8.243l7.905,27.694
+                            c13.215-2.913,19.814-6.835,23.695-10.158c-3.323,3.881-7.245,10.476-10.158,23.69l27.694,7.905
+                            c1.756-10.639,8.187-16.236,8.243-16.292l37.545-37.545l32.794-58.941L304.757,0.004z M255.011,92.86
+                            c-7.818,7.818-20.49,7.818-28.303,0c-7.818-7.818-7.818-20.49,0-28.303c7.818-7.818,20.485-7.818,28.303,0
+                            C262.829,72.37,262.829,85.042,255.011,92.86z M285.884,49.448c-4.316,4.316-11.315,4.316-15.631,0s-4.316-11.315,0-15.631
+                            s11.315-4.316,15.631,0C290.2,38.133,290.2,45.132,285.884,49.448z"/>
+                        <path d="M207.753,154.439c-0.015,0.041-0.031,0.082-0.046,0.118c4.966,5.345,4.89,13.686-0.312,18.888
+                            c-2.627,2.627-6.062,3.948-9.508,3.978c-10.225,19.968-24.76,39.844-42.685,57.774c-29.189,29.189-64.102,49.874-95.78,56.75
+                            c-7.573,1.643-12.38,9.114-10.737,16.686c0.594,2.729,1.946,5.1,3.784,6.938c3.261,3.261,8.064,4.854,12.908,3.799
+                            c36.803-7.982,76.774-31.432,109.676-64.328c22.18-22.18,39.818-47.293,51.517-72.55c-3.635-5.309-3.118-12.605,1.597-17.321
+                            c1.935-1.935,4.311-3.144,6.799-3.671c0.005-0.021,0.015-0.041,0.02-0.056c3.528-1.219,6.845-3.21,9.661-6.026
+                            c3.681-3.681,5.985-8.207,6.943-12.948l-48.773-13.921C199.607,137.194,201.246,147.225,207.753,154.439z"/>
+                        <path d="M240.879,68.94c-5.499,0-9.953,4.459-9.953,9.953s4.454,9.953,9.953,9.953c5.499,0,9.953-4.454,9.953-9.953
+                            S246.373,68.94,240.879,68.94z"/>
+                    </g>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <audio id="audioClick">
+        <source src="./sounds/buttons/buttonclick.wav" type="audio/mp3">
+    </audio>
+    <audio id="audioHover">
+        <source src="./sounds/buttons/buttonrollover.wav" type="audio/mp3">
+    </audio>
+
+    <!-- pro vývoj
+    <button id="changeValueAndColorBtn">Change health</button>
+    <button id="startTimerBtn">Start</button>
+    <button id="pauseTimerBtn">Pause</button>
+    <button id="stopTimerBtn">Stop</button>-->
+</div>
+
+<!-- The Modal -->
+<div class="modal-content" id="modal-content">
+    <div class="modal-header">
+        <span class="modal-close">&times;</span>
+        <h2>Mission Objectives</h2>
+    </div>
+    <div class="modal-body">
+        <ul>
+            <li><input type="checkbox" disabled>Find the building where the bomb is hidden</li>
+            <li><input type="checkbox" disabled>Reach the top floor of the building</li>
+            <li><input type="checkbox" disabled>Locate the bomb and neutralize enemies</li>
+            <li><input type="checkbox" disabled>Find clues to defuse the bomb</li>
+            <li><input type="checkbox" disabled>Deactivate the bomb</li>
+        </ul>
+    </div>
+    <div class="modal-footer"> </div>
+</div>
+<div id="interact-text">
+    <img src="resources/hand_interact.png" alt="Hand Icon" id="hand-icon">
+    Press E to interact
+</div>
+
+<script type="module">
+    import { toggleCamera, GenerateCharacter } from './components/character.js';
+
+    // Připojte funkci toggleCamera k tlačítku po načtení modulu
+    document.getElementById('toggle-camera-btn').addEventListener('click', toggleCamera);
+</script>
+
+    <a-scene id="my_scene" loading-screen physics="gravity: -9.8, debug: true">
+
+        <a-assets>
+            <!-- Env -->
+            <a-asset-item id="man" src="/models/humans/Astronaut.glb"></a-asset-item>
+            <a-asset-item id="walls" src="/models/walls.glb"></a-asset-item>
+<!--            <a-asset-item id="doors_model" src="/models/bulding-parts/wooden_door.glb"></a-asset-item>-->
+            <a-asset-item id="doors_model" src="/models/bulding-parts/wooden_door_fix.glb"></a-asset-item>S
+            <a-asset-item id="Bomb" src="/models/bomb.glb"></a-asset-item>
+            <a-asset-item id="Plier" src="/models/Pliers.glb"></a-asset-item>
+            <a-asset-item id="enemyCharacter" src="/models/humans/Adventurer.glb"></a-asset-item>
+            <a-asset-item id="Pistol" src="/models/Pistol.glb"></a-asset-item>
+        </a-assets>
+
+
+        <a-entity id="doors_model" doors shadow="receive: true" position="10.65 0 -30" rotation="0 0 0" scale="3 3 3" gltf-model="#doors_model" dynamic-body></a-entity>
+
+        <a-entity collectible id="pliers" gltf-model="#Plier" position="-18.299 0 -30.40207" rotation="0 90 0" scale="0.1 0.1 0.1" static-body></a-entity>
+        <a-entity collectible id="bombs" static-body="sphereRadius: NaN" gltf-model="#Bomb" position="32.42998 4.2354 -7.46872" rotation="90 -180 0" scale="4 2 4" static-body></a-entity>
+        <a-entity collectible id="guns" gltf-model="#Pistol" position="-3 3 -3" rotation="0 0 0" static-body></a-entity>
+
+
+
+        <a-sky id="sky" src="../resources/DomeSky.jpg" radius="500"></a-sky>
+        <a-box id="floor" shadow="receive: true" static-body="friction: 0;; sphereRadius: NaN" position="0 0 -25" rotation="-90 0 0" scale="70 50 1" color="#bbaaaa" depth="0.2"  material="src: url(resources/floor/wood_light.jpg); repeat: 10 10;" ></a-box>
+
+        <a-box id="ceiling" shadow="receive: true"  static-body="friction: 0;; sphereRadius: NaN" position="0 12 -25" rotation="-90 0 0" scale="70 50 1" color="#6e818"  depth="0.2"  material="src: url(resources/ceiling.jpg); repeat: 10 10;" ></a-box>
+
+
+        <!-- Okolní stěny domu -->
+        <a-entity id="wall-1" wall2 shadow="receive: true" position="0 6 -45" rotation="0 0 0" scale="70 12 1" static-body></a-entity>
+        <a-entity id="wall-2" static-body="sphereRadius: NaN" wall2 shadow="receive: true" position="0 6 -0.5" rotation="0 0 0" scale="70 12 1" static-body></a-entity>
+        <a-entity id="wall-3" static-body="sphereRadius: NaN" wall2 shadow="receive: true" position="-35 6 -23" rotation="0 -90 0" scale="45 12 1" static-body></a-entity>
+        <a-entity id="wall-4" wall2 shadow="receive: true" position="35 6 -23" rotation="0 -90 0" scale="45 12 1" static-body></a-entity>
+
+<!--        <a-box id="wall-5" wall2 shadow="receive: true" position="35 6 -23" rotation="0 -90 0" scale="45 12 1" static-body></a-box>-->
+<!--        <a-box id="wall-6" wall2 shadow="receive: true" position="35 6 -23" rotation="0 -90 0" scale="45 12 1" static-body></a-box>-->
+<!--        <a-box id="wall-7" wall2 shadow="receive: true" position="35 6 -23" rotation="0 -90 0" scale="45 12 1" static-body></a-box>-->
+
+        <a-entity id="door-1" static-body="sphereRadius: NaN" shadow="receive: true" house-door="height: 2; width: 1" position="-4.0 0 -0.5" scale="2 1.7 1" rotation="0 180 0" static-body></a-entity>
+        <a-entity id="window-1" static-body="sphereRadius: NaN" shadow="receive: true" house-window position="10.5 3 -0.55" rotation="0 180 0" static-body></a-entity>
+        <a-entity id="window-2" static-body="sphereRadius: NaN" shadow="receive: true" house-window position="28 3 -7.05" rotation="0 180 0" static-body></a-entity>
+
+        <!-- Vnitřní stěny domu -->
+        <a-entity id="wall-5" shadow="receive: true" static-body="sphereRadius: NaN" wall2 position="-8 6 -10.5" rotation="0 -90 0" scale="20 12 1" static-body></a-entity>
+        <a-entity id="doors_model-2" doors shadow="receive: true" position="-8 0.1 -23.20" rotation="0 90 0" scale="3 3 3" gltf-model="#doors_model" dynamic-body></a-entity>
+        <a-entity id="wall-5.5" shadow="receive: true" static-body="sphereRadius: NaN" wall2 position="-8 6 -35.9" rotation="0 -90 0" scale="20 12 1" static-body></a-entity>
+        <a-entity id="wallDoor-5" shadow="receive: true" wall3 position="-8 10.6 -23.25" rotation="0 -90 0" scale="5.5 2.7 1"  ></a-entity>
+        <a-entity id="wall-6" shadow="receive: true" wall2 position="20 6 -18" rotation="0 -90 0" scale="35 12 1" static-body></a-entity>
+        <a-entity id="doors_model-3" doors shadow="receive: true" position="20 0.1 -38.20" rotation="0 -90 0" scale="3 3 3" gltf-model="#doors_model" dynamic-body></a-entity>
+        <a-entity id="wallDoor-6" shadow="receive: true" wall3 position="20 10.6 -38.20" rotation="0 -90 0" scale="5.5 2.7 1"  ></a-entity>
+        <a-entity id="wall-6.5" shadow="receive: true" wall2 position="20 6 -43.4" rotation="0 -90 0" scale="5 12 1" static-body></a-entity>
+        <a-entity id="wall-7" shadow="receive: true" wall2 position="0 6 -30" rotation="0 0 0" scale="16 12 1" static-body ></a-entity>
+        <a-entity id="wall-7.5" shadow="receive: true" wall2 position="19.4 6 -30" rotation="0 0 0" scale="12 12 1" static-body ></a-entity>
+        <a-entity id="wallDoor-7" shadow="receive: true" wall3 position="10.7 10.6 -30" rotation="0 0 0" scale="5.5 2.7 1" ></a-entity>
+        <a-entity id="wall-8" static-body="sphereRadius: NaN" wall2 shadow="receive: true" position="27.5 6 -7" rotation="0 0 0" scale="15 12 1" static-body></a-entity>
+
+        <!-- Vstupní místnost -->
+        <a-entity id="shelf-1" shadow="cast: true" position="-7.0 0.12 -6.0" scale="3 3 3" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Shelf Small.glb)"></a-entity>
+        <a-entity id="plant-1" shadow="cast: true" position="-7.0 0.12 -1.5" scale="3 3 3" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Houseplant-2.glb)"></a-entity>
+        <a-entity id="plant-2" static-body="sphereRadius: NaN" shadow="cast: true" position="-7 0.12 -28.0" scale="3 3 3" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Houseplant-2.glb)"></a-entity>
+
+        <a-box id="Lamp Ceiling-2" static-body="sphereRadius: NaN" position="9.8 11.85 -11" scale="3 3 3" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Light Ceiling 2.glb)">
+            <a-sphere id="Lamp light ball 1" geometry="radius: 0.06" radius="1" color="yellow" position="0.00133 -0.90621 -0.28452">
+                <a-entity id="Lamp light1" light="type: spot; penumbra: 0.5; intensity: 1; castShadow: true; angle: 70;" position="0 0.25 0.25" rotation="-90 0 0"></a-entity>
+            </a-sphere>
+            <a-sphere id="Lamp light ball 2" geometry="radius: 0.06" radius="1" color="yellow" position="-0.28456 -1.10109 0.00078"></a-sphere>
+            <a-sphere id="Lamp light ball 3" geometry="radius: 0.06" radius="1" color="yellow" position="0.28553 -0.68461 -0.0023" ></a-sphere>
+            <a-sphere  id="Lamp light ball 4" geometry="radius: 0.06" radius="1" color="yellow" position="0.00073 -1.25389 0.2817"></a-sphere>
+        </a-box>
+
+        <a-box id="Switch-1" static-body="sphereRadius: NaN" shadow="receive: true" position="0.788 3.5 -0.56" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Light Switch.glb)" switch-interaction>>
+        </a-box>
+
+
+        <a-box id="Lamp Ceiling-3" static-body="sphereRadius: NaN" position="-25.282 11.85 -33.644" scale="3 3 3" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Light Ceiling 2.glb)">
+            <a-sphere id="Lamp light 3 ball 1" geometry="radius: 0.06" radius="1" color="yellow" position="0.00133 -0.90621 -0.28452">
+                <a-entity id="Lamp light1" light="type: spot; penumbra: 0.5; intensity: 1; castShadow: true; angle: 70;" position="0 0.25 0.25" rotation="-90 0 0"></a-entity>
+            </a-sphere>
+            <a-sphere id="Lamp light 3 ball 2" geometry="radius: 0.06" radius="1" color="yellow" position="-0.28456 -1.10109 0.00078"></a-sphere>
+            <a-sphere id="Lamp light 3 ball 3" geometry="radius: 0.06" radius="1" color="yellow" position="0.28553 -0.68461 -0.0023" ></a-sphere>
+            <a-sphere  id="Lamp light 3 ball 4" geometry="radius: 0.06" radius="1" color="yellow" position="0.00073 -1.25389 0.2817"></a-sphere>
+        </a-box>
+
+        <a-entity id="Couch 1" shadow="cast: true" position="3.2126 0.11 -11.0" scale="1.5 1.5 1.5" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/L Couch.glb)"></a-entity>
+        <a-entity id="Drawer TV" shadow="cast: true" position="18.5 0.11 -8.0" scale="2 2 2" rotation="0 -90 0" static-body gltf-model="url(models/HouseInteriorPack/Drawer-Tv.glb)"></a-entity>
+        <a-entity id="TV" shadow="cast: true" position="17.9486 3 -8.21902" scale="8 6 6" rotation="0 90 0" static-body gltf-model="url(models/FurnitureKit/Television.glb)"></a-entity>
+        <a-entity id="Fireplace" static-body="sphereRadius: NaN" shadow="cast: true" position="18.87957 0 -21.54935" scale="2 2 2" rotation="0 -90 0" static-body gltf-model="url(models/HouseInteriorPack/Fireplace.glb)"></a-entity>
+        <a-entity id="Rug" geometry="height: 0.1" shadow="cast: true" position="13.775 0.2 -21.442" scale="2.5 0.1944 3" rotation="0 0 0" gltf-model="url(models/HouseInteriorPack/Rug.glb)"></a-entity>
+        <a-entity id="Table" shadow="cast: true" static-body="sphereRadius: 10; mass: 0.1" position="8.66886 0.11 -8.04933" scale="2 2 2" rotation="0 -90 0" static-body gltf-model="url(models/HouseInteriorPack/Table Round tv.glb)"></a-entity>
+        <a-entity id="Drawer" shadow="cast: true" static-body="sphereRadius: 10; mass: 0.1" position="2 0 -28.5" scale="2 2 2" rotation="0 0 0" static-body gltf-model="url(models/HouseInteriorPack/Drawer-big.glb)"></a-entity>
+
+        <a-box id="Lamp Ceiling-4" static-body="sphereRadius: NaN" position="27.60069 11.85 -15.09836" scale="3 3 3" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Light Ceiling 2.glb)">
+            <a-sphere id="Lamp light 4 ball 1" geometry="radius: 0.06" radius="1" color="yellow" position="0.00133 -0.90621 -0.28452">
+                <a-entity id="Lamp light1" light="type: spot; penumbra: 0.5; intensity: 1; castShadow: true; angle: 70;" position="0 0.25 0.25" rotation="-90 0 0"></a-entity>
+            </a-sphere>
+            <a-sphere id="Lamp light 4 ball 2" geometry="radius: 0.06" radius="1" color="yellow" position="-0.28456 -1.10109 0.00078"></a-sphere>
+            <a-sphere id="Lamp light 4 ball 3" geometry="radius: 0.06" radius="1" color="yellow" position="0.28553 -0.68461 -0.0023" ></a-sphere>
+            <a-sphere  id="Lamp light 4 ball 4" geometry="radius: 0.06" radius="1" color="yellow" position="0.00073 -1.25389 0.2817"></a-sphere>
+        </a-box>
+
+        <a-entity id="Fridge" static-body="sphereRadius: NaN" shadow="cast: true" position="11.567 0 -43.775" scale="2 2 2" rotation="0 0 0" static-body gltf-model="url(models/HouseInteriorPack/Kitchen Fridge.glb)"></a-entity>
+        <a-entity id="Sink" shadow="cast: true" position="9.2908 0.11 -43.89911" scale="2 2 2" rotation="0 0 0" static-body gltf-model="url(models/HouseInteriorPack/Kitchen Sink.glb)"></a-entity>
+        <a-entity id="Oven" shadow="cast: true" position="7.10938 0.11 -43.89911" scale="2 2 2" rotation="0 0 0" static-body gltf-model="url(models/HouseInteriorPack/Oven.glb)"></a-entity>
+        <a-entity id="Table kitchen" static-body="sphereRadius: NaN" shadow="cast: true" position="0.02142 0.11 -37.10219" scale="2 2 2" rotation="0 -90 0" static-body gltf-model="url(models/HouseInteriorPack/Table Round Large.glb)"></a-entity>
+        <a-entity id="Chair1 kitchen" static-body="sphereRadius: NaN" shadow="cast: true" position="3.13586 0.11 -38.32827" scale="2 2 2" rotation="0 -90 0" static-body gltf-model="url(models/HouseInteriorPack/Chair.glb)"></a-entity>
+        <a-entity id="Chair2 kitchen" static-body="sphereRadius: NaN" shadow="cast: true" position="3.09756 0.11 -35.58654" scale="2 2 2" rotation="0 -90 0" static-body gltf-model="url(models/HouseInteriorPack/Chair.glb)"></a-entity>
+        <a-entity id="Shelf kitchen" static-body="sphereRadius: NaN" shadow="cast: true" position="-7 0.11 -34.458" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/shelf Large.glb)"></a-entity>
+        <a-entity id="Trash" static-body="sphereRadius: NaN" shadow="cast: true" position="13.42278 0 -44.61741" scale="2 2 2" rotation="0 0 0" static-body gltf-model="url(models/HouseInteriorPack/Trashcan Small.glb)"></a-entity>
+        <a-entity id="Houseplant kitchen" static-body="sphereRadius: NaN" shadow="cast: true" position="18.80847 0 -43.83947" scale="2 2 2" rotation="0 0 0" static-body gltf-model="url(models/HouseInteriorPack/Houseplant-3.glb)"></a-entity>
+
+         <a-box id="Lamp Ceiling-5" static-body="sphereRadius: NaN" position="-1.14677 11.85 -37.7876" scale="3 3 3" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Light Ceiling 2.glb)">
+            <a-sphere id="Lamp bomb light ball 14" geometry="radius: 0.06" radius="1" color="yellow" position="0.00133 -0.90621 -0.28452">
+                <a-entity id="Lamp light1" light="type: spot; penumbra: 0.5; intensity: 1; castShadow: true;" rotation="-90 0 0"></a-entity>
+            </a-sphere>
+
+            <a-sphere id="Lamp bomb light ball 15" geometry="radius: 0.06" radius="1" color="yellow" position="-0.28456 -1.10109 0.00078">
+                <a-entity id="Lamp light2" light="type: spot; penumbra: 0.5; intensity: 1; castShadow: true;" rotation="-90 0 0"></a-entity>
+            </a-sphere>
+        </a-box>
+
+        <a-entity id="Sink bathroom" static-body="sphereRadius: NaN" shadow="cast: true" position="20.52775 0 -24.31399" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Bathroom Sink.glb)"></a-entity>
+        <a-entity id="Bathtub bathroom" static-body="sphereRadius: NaN" shadow="cast: true" position="21.79224 0 -11.49119" scale="2 2 2" rotation="0 180 0" static-body gltf-model="url(models/HouseInteriorPack/Bathtub.glb)"></a-entity>
+
+        <a-entity id="Bed" static-body="sphereRadius: NaN" shadow="cast: true" position="-16.87255 0 -4.73559" scale="2 2 2" rotation="0 180 0" static-body gltf-model="url(models/HouseInteriorPack/Bed King.glb)"></a-entity>
+        <a-entity id="NightStand" static-body="sphereRadius: NaN" shadow="cast: true" position="-20.99769 0 -2" scale="2 2 2" rotation="0 180 0" static-body gltf-model="url(models/HouseInteriorPack/Night Stand.glb)"></a-entity>
+        <a-entity id="LightDesk" static-body="sphereRadius: NaN" shadow="cast: true" position="-20.998 1.871 -2" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Light Desk.glb)">
+            <a-sphere id="Lamp Bed light ball 5" scale="0.5 0.5 0.5" visible="true" geometry="radius: 0.06" radius="1" color="yellow" position="-0.01189 0.38483 0.25542">
+                <a-entity id="Lamp light5" light="type: spot; penumbra: 0.5; intensity: 0.8; castShadow: true;; distance: 15; shadowBias: -0.7; decay: 1; angle: 100" rotation="-120 0 0"></a-entity>
+            </a-sphere>
+        </a-entity>
+        <a-entity id="NightStand2" static-body="sphereRadius: NaN" shadow="cast: true" position="-12.81539 0 -2" scale="2 2 2" rotation="0 180 0" static-body gltf-model="url(models/HouseInteriorPack/Night Stand.glb)"></a-entity>
+        <a-entity id="Couch Med" static-body="sphereRadius: NaN" shadow="cast: true" position="-24.74415 0 -42.1063" scale="2 2 2" rotation="0 0 0" static-body gltf-model="url(models/HouseInteriorPack/Couch Medium.glb)"></a-entity>
+        <a-entity id="Drawer Med" static-body="sphereRadius: NaN" shadow="cast: true" position="-33.67408 0 -7.01699" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Drawer-Med.glb)"></a-entity>
+        <a-entity id="Drawer Med2" static-body="sphereRadius: NaN" shadow="cast: true" position="-9.12621 0 -29.67968" scale="2 2 2" rotation="0 -90 0" static-body gltf-model="url(models/HouseInteriorPack/Drawer-Med.glb)"></a-entity>
+        <a-entity id="Drawer Med3" static-body="sphereRadius: NaN" shadow="cast: true" position="-33.67408 0 -18.85157" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Drawer-Med.glb)"></a-entity>
+        <a-entity id="Column" static-body="sphereRadius: NaN" shadow="cast: true" position="-33.34008 0 -43" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Column Round.glb)"></a-entity>
+        <a-entity id="Column2" static-body="sphereRadius: NaN" shadow="cast: true" position="-9.66673 0 -43" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Column Round.glb)"></a-entity>
+        <a-entity id="Table round2" static-body="sphereRadius: NaN" shadow="cast: true" position="-24.148 0.14949 -32.15508" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Table Round Small.glb)"></a-entity>
+        <a-entity id="Couch small2" static-body="sphereRadius: NaN" shadow="cast: true" position="-32.1993 0 -32.30803" scale="2 2 2" rotation="0 90 0" static-body gltf-model="url(models/HouseInteriorPack/Couch Small.glb)"></a-entity>
+
+        <a-entity id="Rug 2" static-body="sphereRadius: NaN" shadow="cast: true" position="-21.54345 0.2 -19.77255" scale="5 1 6" rotation="0 90 0" gltf-model="url(models/HouseInteriorPack/Rug.glb)"></a-entity>
+
+
+        <a-entity id="Washing Machine" static-body="sphereRadius: NaN" shadow="cast: true" position="22.10705 0.11 -31.28852" scale="2 2 2" rotation="0 180 0" static-body gltf-model="url(models/HouseInteriorPack/Washing Machine.glb)"></a-entity>
+
+<!--        intensity: 0.03-->
+        <a-entity id="ambient_light" light="type: ambient; color: #FFF; intensity: 0.04;"></a-entity>
+
+        <a-entity id="character" character="hasKey:true;" dynamic-body="mass: 1; angularDamping: 1; shape: box;" position="-3 0 -3">
+            <a-entity id="man" gltf-model="#man" rotate-with-camera  animation-mixer="clip:CharacterArmature|Idle; loop:true;" rotation="0 180 0" scale="3 3 3">
+                <a-entity id="Pistol" gltf-model="#Pistol" gun visible="false" scale="0.2 0.2 0.2" rotation="0 0 0"></a-entity>
+            </a-entity>
+            <a-entity raycaster="direction: 0 0 -1; far: 1;" position="0 1.5 0"></a-entity>
+            <a-entity id="first-camera" camera position="0 5 -1" active="true" look-controls="pointerLockEnabled: true" circle-around="radius: -1">
+                <a-cursor intersection-spawn="event: click; mixin: voxel"></a-cursor>
+            </a-entity>
+            <a-entity id="third-camera" camera position="0 6 4" active="false" look-controls="pointerLockEnabled: true" orbit-controls="target: #character; minDistance: 2; maxDistance: 10; initialPosition: 0 5 10; rotateSpeed: 0.5">
+                <a-cursor intersection-spawn="event: click; mixin: voxel"></a-cursor>
+            </a-entity>
+        </a-entity>
+
+
+        <a-entity id="enemy" enemy="fireRange: 10; health: 10" class="enemy" gltf-model="#enemyCharacter" position="-18.299 0 -40.40207" rotation="0 6.585 0" scale="4 4 4" static-body></a-entity>
+        <!-- bulding entery -->
+<!--        <a-box id="entrance-marker" static-body="sphereRadius: NaN" entrance-marker="target: #character" position="0 1.50034 -25.67374" width="1" height="0.1" depth="1" color="yellow" static-body></a-box>-->
+
+    </a-scene>
+
+    <script type="module" src="/script/map-floor1.js"></script>
+</body>
+</html>
